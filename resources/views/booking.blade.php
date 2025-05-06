@@ -20,7 +20,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 
-
     <!-- Styles / Scripts -->
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -43,26 +42,24 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand bg-white fixed-top shadow-sm ps-5">
         <div class="container-fluid ps-0">
+            <!-- Left links -->
             <div class="d-flex align-items-center">
                 <a class="navbar-brand me-4" href="#">Navbar</a>
                 <div class="navbar-nav">
                     <a class="nav-link active pe-3" href="#">Home</a>
                     <a class="nav-link pe-3" href="#">Features</a>
-                    <a class="nav-link pe-3" href="#">Pricing</a>
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
                 </div>
             </div>
+
             <!-- Right-aligned Navbar Content -->
             <div class="ms-auto d-flex align-items-center pe-4">
                 @auth
-                    <!-- Profile Icon for Logged-in User -->
                     <a class="nav-link" href="{{ route('userprofile') }}">
                         <i class="fas fa-user-circle fa-3x"></i>
                     </a>
                 @endauth
 
                 @guest
-                    <!-- Login & Register for Guests -->
                     <a class="btn btn-outline-primary me-2" href="{{ route('login') }}">Login</a>
                     @if (Route::has('register'))
                         <a class="btn btn-primary" href="{{ route('register') }}">Register</a>
@@ -72,8 +69,6 @@
         </div>
     </nav>
 
-
-
     <!-- Main Content -->
     <main class="container py-4">
         @if (Route::has('login'))
@@ -82,38 +77,57 @@
 
         <!-- Your page content here -->
          <!-- Hero Section -->
-        <div class="position-relative overflow-hidden" style="height: 500px; margin-top: 10px; border-radius: 70px 0 70px 0">
-        <!-- Background Image -->
-        <div class="position-absolute top-0 start-0 w-100 h-100"
-            style="background: url('{{ asset('images/uitmimage.jpg') }}') center/cover no-repeat; border-radius: inherit;">
+        <div class="container my-5">
+            <h2 class="mb-4">Book a Room</h2>
+
+            <form action="{{ route('bookings.store') }}" method="POST" class="p-4 border rounded shadow-sm bg-white">
+                @csrf
+
+                <!-- Room Selection -->
+                <div class="mb-3">
+                    <label for="room_id" class="form-label">Select Room</label>
+                    <select name="room_id" id="room_id" class="form-select" required>
+                        <option value="" disabled selected>-- Choose a Room --</option>
+                        @foreach ($rooms as $room)
+                            <option value="{{ $room->id }}">{{ $room->name }} ({{ $room->type }})</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Date -->
+                <div class="mb-3">
+                    <label for="booking_date" class="form-label">Date</label>
+                    <input type="date" name="booking_date" id="booking_date" class="form-control" required>
+                </div>
+
+                <!-- Time Slot -->
+                <div class="row mb-3">
+                    <div class="col">
+                        <label for="start_time" class="form-label">Start Time</label>
+                        <input type="time" name="start_time" id="start_time" class="form-control" required>
+                    </div>
+                    <div class="col">
+                        <label for="end_time" class="form-label">End Time</label>
+                        <input type="time" name="end_time" id="end_time" class="form-control" required>
+                    </div>
+                </div>
+
+                <!-- Purpose -->
+                <div class="mb-3">
+                    <label for="purpose" class="form-label">Purpose</label>
+                    <textarea name="purpose" id="purpose" rows="3" class="form-control" placeholder="Meeting, Lecture, Discussion, etc." required></textarea>
+                </div>
+
+                <!-- Submit -->
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check-circle me-1"></i> Confirm Booking
+                    </button>
+                </div>
+            </form>
         </div>
-        
-        <!-- Dark Overlay -->
-        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50" style="border-radius: inherit;"></div>
-        
-        <!-- Content -->
-        <div class="position-relative container h-100 d-flex flex-column justify-content-center text-white ps-5">
-            <h1 class="display-1 ps-3 ps-md-5">Welcome to Our Site</h1>
-            <p class="lead fs-3 ps-3 ps-md-5">This is some introductory text</p>
-        </div>
-    </div>
-    <!-- Action Buttons Section -->
-    <div class="container my-5">
-        <div class="row g-4">
-            <div class="col-md-6">
-                <a href="{{ route('bookings.create') }}" class="btn btn-primary btn-lg w-100 h-100 py-4 d-flex flex-column align-items-center justify-content-center">
-                    <i class="fas fa-calendar-check fa-2x mb-2"></i>
-                    Book a Room
-                </a>
-            </div>
-            <div class="col-md-6">
-                <a href="{{ route('infographic') }}" class="btn btn-dark btn-lg w-100 h-100 py-4 d-flex flex-column align-items-center justify-content-center">
-                    <i class="fas fa-door-open fa-2x mb-2"></i>
-                    View Available Rooms
-                </a>
-            </div>
-        </div>
-    </div>
+
+
     </main>
 </body>
 </html>
