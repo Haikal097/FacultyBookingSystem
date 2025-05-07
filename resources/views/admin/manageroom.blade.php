@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Rooms - Admin Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --sidebar-bg: #1a237e;
+            --sidebar-active: #3949ab;
+            --primary-color: #4a6bff;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --danger-color: #f44336;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            width: 280px;
+            background: var(--sidebar-bg);
+            color: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .sidebar-brand {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar-brand h4 {
+            font-weight: 600;
+            margin-bottom: 0;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            border-radius: 6px;
+            margin: 0.25rem 1rem;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, 
+        .sidebar .nav-link.active {
+            background: var(--sidebar-active);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            width: 24px;
+            text-align: center;
+            margin-right: 10px;
+        }
+        
+        .content {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .header h2 {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 1.25rem 1.5rem;
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-top: none;
+        }
+        
+        .table td {
+            padding: 1rem 1.5rem;
+            vertical-align: middle;
+        }
+        
+        .badge {
+            font-weight: 500;
+            padding: 0.35em 0.65em;
+        }
+        
+        .btn-action {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .search-box {
+            position: relative;
+            max-width: 300px;
+        }
+        
+        .search-box .form-control {
+            padding-left: 2.5rem;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        
+        .pagination .page-link {
+            border-radius: 6px !important;
+            margin: 0 3px;
+            border: none;
+            color: #495057;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+        }
+        
+        .room-type-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+        
+        .room-capacity {
+            display: inline-flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+        }
+        
+        .room-status {
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .room-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar d-flex flex-column">
+        <div class="sidebar-brand">
+            <h4><i class="fas fa-shield-alt me-2"></i>Admin Panel</h4>
+        </div>
+        <ul class="nav nav-pills flex-column flex-grow-1">
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-users"></i>Manage Users</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link active"><i class="fas fa-door-open"></i>Manage Rooms</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-calendar-check"></i>Manage Bookings</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link"><i class="fas fa-cog"></i>Settings</a>
+            </li>
+        </ul>
+        <form method="POST" action="{{ route('logout') }}" class="mt-auto px-3 pb-3">
+            @csrf
+            <button type="submit" class="btn btn-logout w-100 py-2">
+                <i class="fas fa-sign-out-alt me-2"></i>Logout
+            </button>
+        </form>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <div class="header">
+            <h2>Manage Rooms</h2>
+            <div class="d-flex align-items-center">
+                <div class="search-box me-3">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" placeholder="Search rooms...">
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                    <i class="fas fa-plus me-2"></i>Add Room
+                </button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">All Rooms</h5>
+                <div class="d-flex">
+                    <select class="form-select form-select-sm me-2" style="width: 150px;">
+                        <option>All Types</option>
+                        <option>Lecture Hall</option>
+                        <option>Meeting Room</option>
+                        <option>Computer Lab</option>
+                        <option>Sports Facility</option>
+                    </select>
+                    <select class="form-select form-select-sm me-2" style="width: 140px;">
+                        <option>All Statuses</option>
+                        <option>Available</option>
+                        <option>Occupied</option>
+                        <option>Maintenance</option>
+                    </select>
+                    <button class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Room ID</th>
+                            <th>Room Name</th>
+                            <th>Type</th>
+                            <th>Capacity</th>
+                            <th>Building</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Room 1 -->
+                        <tr>
+                            <td>RM-001</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="room-type-icon bg-primary bg-opacity-10 text-primary">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Dewan Kuliah 200</h6>
+                                        <small class="text-muted">Floor 2, Block A</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Lecture Hall</td>
+                            <td>
+                                <span class="room-capacity">
+                                    <i class="fas fa-users me-1"></i> 200
+                                </span>
+                            </td>
+                            <td>Academic Building</td>
+                            <td>
+                                <span class="room-status">
+                                    <span class="room-status-dot bg-success"></span>
+                                    Available
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="View Calendar">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <!-- Room 2 -->
+                        <tr>
+                            <td>RM-002</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="room-type-icon bg-info bg-opacity-10 text-info">
+                                        <i class="fas fa-laptop"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Makmal Komputer 1</h6>
+                                        <small class="text-muted">Floor 1, Block B</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Computer Lab</td>
+                            <td>
+                                <span class="room-capacity">
+                                    <i class="fas fa-users me-1"></i> 30
+                                </span>
+                            </td>
+                            <td>ICT Building</td>
+                            <td>
+                                <span class="room-status">
+                                    <span class="room-status-dot bg-success"></span>
+                                    Available
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="View Calendar">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <!-- Room 3 -->
+                        <tr>
+                            <td>RM-003</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="room-type-icon bg-warning bg-opacity-10 text-warning">
+                                        <i class="fas fa-users"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Bilik Mesyuarat Utama</h6>
+                                        <small class="text-muted">Floor 3, Block A</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Meeting Room</td>
+                            <td>
+                                <span class="room-capacity">
+                                    <i class="fas fa-users me-1"></i> 20
+                                </span>
+                            </td>
+                            <td>Administration Building</td>
+                            <td>
+                                <span class="room-status">
+                                    <span class="room-status-dot bg-danger"></span>
+                                    Occupied
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="View Calendar">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <!-- Room 4 -->
+                        <tr>
+                            <td>RM-004</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="room-type-icon bg-success bg-opacity-10 text-success">
+                                        <i class="fas fa-running"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Gelanggang Futsal</h6>
+                                        <small class="text-muted">Sports Complex</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Sports Facility</td>
+                            <td>
+                                <span class="room-capacity">
+                                    <i class="fas fa-users me-1"></i> 50
+                                </span>
+                            </td>
+                            <td>Sports Center</td>
+                            <td>
+                                <span class="room-status">
+                                    <span class="room-status-dot bg-warning"></span>
+                                    Maintenance
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="View Calendar">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <!-- Room 5 -->
+                        <tr>
+                            <td>RM-005</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="room-type-icon bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="fas fa-microscope"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Makmal Sains 3</h6>
+                                        <small class="text-muted">Floor 2, Block C</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Science Lab</td>
+                            <td>
+                                <span class="room-capacity">
+                                    <i class="fas fa-users me-1"></i> 25
+                                </span>
+                            </td>
+                            <td>Science Building</td>
+                            <td>
+                                <span class="room-status">
+                                    <span class="room-status-dot bg-success"></span>
+                                    Available
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="View Calendar">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <div class="text-muted">
+                    Showing 1 to 5 of 15 rooms
+                </div>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination mb-0">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1">Previous</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Room Modal -->
+    <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addRoomModalLabel">Add New Room</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form>
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="roomName" class="form-label">Room Name</label>
+                                <input type="text" class="form-control" id="roomName" placeholder="e.g. Dewan Kuliah 100" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="roomType" class="form-label">Room Type</label>
+                                <select class="form-select" id="roomType" required>
+                                    <option value="">Select type</option>
+                                    <option>Lecture Hall</option>
+                                    <option>Meeting Room</option>
+                                    <option>Computer Lab</option>
+                                    <option>Science Lab</option>
+                                    <option>Sports Facility</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="roomCapacity" class="form-label">Capacity</label>
+                                <input type="number" class="form-control" id="roomCapacity" min="1" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="building" class="form-label">Building</label>
+                                <input type="text" class="form-control" id="building" placeholder="e.g. Block A" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="floor" class="form-label">Floor</label>
+                                <input type="text" class="form-control" id="floor" placeholder="e.g. Floor 2">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="roomStatus" class="form-label">Status</label>
+                                <select class="form-select" id="roomStatus" required>
+                                    <option value="available">Available</option>
+                                    <option value="maintenance">Under Maintenance</option>
+                                    <option value="occupied">Occupied</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="roomFeatures" class="form-label">Features</label>
+                                <select class="form-select" id="roomFeatures" multiple>
+                                    <option>Projector</option>
+                                    <option>Whiteboard</option>
+                                    <option>Air Conditioner</option>
+                                    <option>Sound System</option>
+                                    <option>Computers</option>
+                                    <option>WiFi</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="roomDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="roomDescription" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Room</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
