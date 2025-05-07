@@ -1,119 +1,123 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('app')
 
-    <title>Laravel</title>
+@section('title', 'Home - Facility Booking System')
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-
-
-    <!-- Styles / Scripts -->
-    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @else
-        <style>
-            body {
-                font-family: 'Instrument Sans', sans-serif;
-            }
-        </style>
-    @endif
-
-    <style>
-        body {
-            padding-top: 70px; /* Adjust depending on navbar height */
+@section('styles')
+<style>
+    .hero-section {
+        height: 100vh;
+        min-height: 600px;
+        margin-top: 70px;
+        border-radius: 0 0 80px 80px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .hero-content {
+        z-index: 2;
+        animation: fadeInUp 1s ease-out;
+    }
+    
+    .hero-title {
+        font-weight: 800;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        letter-spacing: -1px;
+    }
+    
+    .hero-subtitle {
+        text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    
+    .action-card {
+        transition: all 0.3s ease;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        height: 100%;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    
+    .action-icon {
+        transition: all 0.3s ease;
+    }
+    
+    .action-card:hover .action-icon {
+        transform: scale(1.1);
+    }
+    
+    .features-section {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ed 100%);
+        border-radius: 80px 80px 0 0;
+        padding: 80px 0;
+        margin-top: -80px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
         }
-    </style>
-</head>
-<body class="bg-light text-dark min-vh-100">
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+@endsection
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand bg-white fixed-top shadow-sm ps-5">
-        <div class="container-fluid ps-0">
-            <div class="d-flex align-items-center">
-                <a class="navbar-brand me-4" href="#">Navbar</a>
-                <div class="navbar-nav">
-                    <a class="nav-link active pe-3" href="#">Home</a>
-                    <a class="nav-link pe-3" href="#">Features</a>
-                    <a class="nav-link pe-3" href="#">Pricing</a>
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-                </div>
-            </div>
-            <!-- Right-aligned Navbar Content -->
-            <div class="ms-auto d-flex align-items-center pe-4">
-                @auth
-                    <!-- Profile Icon for Logged-in User -->
-                    <a class="nav-link" href="{{ route('userprofile') }}">
-                        <i class="fas fa-user-circle fa-3x"></i>
-                    </a>
-                @endauth
-
-                @guest
-                    <!-- Login & Register for Guests -->
-                    <a class="btn btn-outline-primary me-2" href="{{ route('login') }}">Login</a>
-                    @if (Route::has('register'))
-                        <a class="btn btn-primary" href="{{ route('register') }}">Register</a>
-                    @endif
-                @endguest
-            </div>
-        </div>
-    </nav>
-
-
-
-    <!-- Main Content -->
-    <main class="container py-4">
-        @if (Route::has('login'))
-            <div class="mb-4"></div>
-        @endif
-
-        <!-- Your page content here -->
-         <!-- Hero Section -->
-        <div class="position-relative overflow-hidden" style="height: 500px; margin-top: 10px; border-radius: 70px 0 70px 0">
+@section('content')
+    <!-- Hero Section -->
+    <section class="hero-section">
         <!-- Background Image -->
         <div class="position-absolute top-0 start-0 w-100 h-100"
-            style="background: url('{{ asset('images/uitmimage.jpg') }}') center/cover no-repeat; border-radius: inherit;">
+            style="background: url('{{ asset('images/uitmimage.jpg') }}') center/cover no-repeat;">
         </div>
         
         <!-- Dark Overlay -->
-        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50" style="border-radius: inherit;"></div>
+        <div class="position-absolute top-0 start-0 w-100 h-100 bg-black opacity-50"></div>
         
         <!-- Content -->
-        <div class="position-relative container h-100 d-flex flex-column justify-content-center text-white ps-5">
-            <h1 class="display-1 ps-3 ps-md-5">Welcome to Our Site</h1>
-            <p class="lead fs-3 ps-3 ps-md-5">This is some introductory text</p>
-        </div>
-    </div>
-    <!-- Action Buttons Section -->
-    <div class="container my-5">
-        <div class="row g-4">
-            <div class="col-md-6">
-                <a href="{{ route('bookings.create') }}" class="btn btn-primary btn-lg w-100 h-100 py-4 d-flex flex-column align-items-center justify-content-center">
-                    <i class="fas fa-calendar-check fa-2x mb-2"></i>
-                    Book a Room
-                </a>
+        <div class="position-relative container h-100 d-flex flex-column justify-content-center hero-content" style="margin-top: 250px;">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center text-md-start">
+                    <h1 class="hero-title display-2 fw-bold text-white mb-4">
+                        Welcome to <span class="text-primary">UITM</span> Facility Booking
+                    </h1>
+                    <p class="hero-subtitle lead fs-3 text-white mb-5">
+                        Easily book lecture halls, meeting rooms, and sports facilities with our intuitive platform
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center justify-content-md-start">
+                        <a href="{{ route('bookings.create') }}" class="btn btn-primary btn-lg px-4 py-3 rounded-pill">
+                            <i class="fas fa-calendar-check me-2"></i> Book Now
+                        </a>
+                        <a href="{{ route('infographic') }}" class="btn btn-outline-light btn-lg px-4 py-3 rounded-pill">
+                            <i class="fas fa-door-open me-2"></i> View Facilities
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-6">
-                <a href="{{ route('infographic') }}" class="btn btn-dark btn-lg w-100 h-100 py-4 d-flex flex-column align-items-center justify-content-center">
-                    <i class="fas fa-door-open fa-2x mb-2"></i>
-                    View Available Rooms
-                </a>
-            </div>
         </div>
-    </div>
-    </main>
-</body>
-</html>
+    </section>
+@endsection
+@section('scripts')
+@endsection

@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('homepage');
 
 Route::get('/userprofile', function () {
     return view('userprofile');
@@ -14,6 +14,30 @@ Route::get('/userprofile', function () {
 Route::get('/infographic', function () {
     return view('infographic');
 })->name('infographic'); 
+
+Route::get('/adminlogin', function () {
+    return view('admin.login');
+})->name('admin.login'); 
+
+Route::get('/admindashboard', function () {
+    return view('admin.dashboard');
+})->name('admin.dashboard'); 
+
+Route::get('/manageusers', function () {
+    return view('admin.manageuser');
+})->name('admin.manageuser'); 
+
+Route::get('/managerooms', function () {
+    return view('admin.manageroom');
+})->name('admin.manageroom');
+
+Route::get('/managebookings', function () {
+    return view('admin.managebooking');
+})->name('admin.managebooking'); 
+
+Route::get('/adminsettings', function () {
+    return view('admin.setting');
+})->name('admin.setting'); 
 
 Route::get('/dashboard', function () {
     return view('dashboard');
