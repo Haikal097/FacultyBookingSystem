@@ -8,12 +8,13 @@
                 <a class="nav-link pe-3 {{ request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">
                     <i class="fas fa-home me-1"></i> Home
                 </a>
-                <a class="nav-link pe-3 {{ request()->is('bookings*') ? 'active' : '' }}" href="{{ route('bookings.create') }}">
+                <a class="nav-link pe-3 {{ request()->is('booking') ? 'active' : '' }}" href="{{ route('bookings.create') }}">
                     <i class="fas fa-calendar-check me-1"></i> Book Room
                 </a>
+                <!--
                 <a class="nav-link pe-3 {{ request()->is('my-bookings*') ? 'active' : '' }}" href="#">
                     <i class="fas fa-history me-1"></i> My Bookings
-                </a>
+                </a>-->
             </div>
         </div>
 
@@ -26,7 +27,7 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="{{ route('userprofile') }}"><i class="fas fa-user me-2"></i> Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                        <!--<li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>-->
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Manage Bookings - Admin Dashboard</title>
 
     <!-- Bootstrap CSS -->
@@ -195,6 +196,21 @@
             padding: 1rem;
             margin-top: 0.5rem;
         }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 1rem;
+        }
+        
+        .btn-logout:hover {
+            background: var(--danger-color);
+        }
     </style>
 </head>
 <body>
@@ -206,24 +222,25 @@
         </div>
         <ul class="nav nav-pills flex-column flex-grow-1">
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-users"></i>Manage Users</a>
+                <a href="{{ route('admin.manageuser') }}" class="nav-link"><i class="fas fa-users"></i>Manage Users</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-door-open"></i>Manage Rooms</a>
+                <a href="{{ route('rooms.index') }}" class="nav-link"><i class="fas fa-door-open"></i>Manage Rooms</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link active"><i class="fas fa-calendar-check"></i>Manage Bookings</a>
+                <a href="{{ route('admin.managebooking') }}" class="nav-link active"><i class="fas fa-calendar-check"></i>Manage Bookings</a>
             </li>
+            <!--
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-cog"></i>Settings</a>
-            </li>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="fas fa-cog"></i>Settings</a>
+            </li>-->
         </ul>
-        <form method="POST" action="{{ route('logout') }}" class="mt-auto px-3 pb-3">
+        <form method="POST" action="{{ route('logout') }}" class="mt-auto px-5">
             @csrf
-            <button type="submit" class="btn btn-logout w-100 py-2">
+            <button type="submit" class="btn btn-logout w-75">
                 <i class="fas fa-sign-out-alt me-2"></i>Logout
             </button>
         </form>
@@ -252,29 +269,19 @@
                         <li><a class="dropdown-item" href="#">Rejected</a></li>
                     </ul>
                 </div>
-                <button class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i>New Booking
-                </button>
             </div>
         </div>
         
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">All Bookings</h5>
-                <div class="d-flex">
-                    <input type="date" class="form-control form-control-sm me-2" style="width: 150px;">
-                    <button class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-download me-1"></i>Export
-                    </button>
-                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Booking ID</th>
-                            <th>Event</th>
-                            <th>Room</th>
+                            <th>Purpose</th>
+                            <th>Facility</th>
                             <th>User</th>
                             <th>Date & Time</th>
                             <th>Status</th>
@@ -282,260 +289,124 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Booking 1 -->
-                        <tr>
-                            <td>BK-2023-001</td>
-                            <td>
-                                <strong>CS101 Lecture</strong>
-                                <div class="booking-details small">
-                                    <div><i class="fas fa-user-tie me-1"></i> Prof. Ahmad</div>
-                                    <div><i class="fas fa-users me-1"></i> 120 students</div>
+                    @foreach ($bookings as $booking)
+                    <tr>
+                        <td>
+                            <div class="room-info">
+                                <div class="room-name fw-bold">{{ $booking->purpose_type }}</div>
+                                <div class="room-capacity small text-muted">
+                                    <i class="fas fa-info-circle me-1"></i> {{ \Illuminate\Support\Str::limit($booking->purpose, 20) }}
                                 </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-door-open me-2"></i>
-                                    <div>
-                                        <div>Dewan Kuliah 200</div>
-                                        <small class="text-muted">Academic Building</small>
-                                    </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-door-open me-2"></i>
+                                <div>
+                                    <div>{{ $booking->room->name }}</div>
+                                    <small class="text-muted">{{ $booking->room->building ?? 'Main Building' }}</small>
                                 </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <img src="https://randomuser.me/api/portraits/men/32.jpg" class="user-avatar">
-                                    <div>
-                                        <div>Ahmad bin Abdullah</div>
-                                        <small class="text-muted">Faculty</small>
-                                    </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-circle fa-2x text-secondary me-2"></i>
+                                <div>
+                                    <div>{{ $booking->user->name }}</div>
+                                    <small class="text-muted">{{ $booking->user->email }}</small>
                                 </div>
-                            </td>
-                            <td>
-                                <div><i class="fas fa-calendar-day calendar-icon"></i> Mon, 15 Jan 2023</div>
-                                <div><i class="fas fa-clock calendar-icon"></i> 09:00 - 12:00</div>
-                            </td>
-                            <td>
-                                <span class="booking-status">
-                                    <span class="booking-status-dot bg-success"></span>
-                                    Approved
-                                </span>
-                            </td>
-                            <td>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <i class="fas fa-calendar-day calendar-icon"></i>
+                                {{ \Carbon\Carbon::parse($booking->booking_date)->format('D, d M Y') }}
+                            </div>
+                            <div>
+                                <i class="fas fa-clock calendar-icon"></i>
+                                {{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}
+                            </div>
+                        </td>
+                        <td>
+                            @php
+                                $statusColor = [
+                                    'approved' => 'success',
+                                    'pending' => 'warning',
+                                    'rejected' => 'danger',
+                                ][$booking->status] ?? 'secondary';
+                            @endphp
+                            <span class="booking-status">
+                                <span class="booking-status-dot bg-{{ $statusColor }}"></span>
+                                {{ ucfirst($booking->status) }}
+                            </span>
+                        </td>
+                        <td>
+                            @if ($booking->status === 'pending')
+                                <!-- Approve button -->
+                                <form action="{{ route('bookings.approve', $booking->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button class="btn btn-sm btn-outline-success btn-action me-1" title="Approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+
+                                <!-- Reject button -->
+                                <form action="{{ route('bookings.reject', $booking->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button class="btn btn-sm btn-outline-danger btn-action me-1" title="Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            @elseif ($booking->status === 'rejected')
+                            <!--
+                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>-->
+                            <button class="btn btn-sm btn-outline-danger btn-action" 
+                                    title="Delete" 
+                                    data-booking-id="{{ $booking->id }}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            @else
+                            <!--
                                 <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button class="btn btn-sm btn-outline-danger btn-action" title="Cancel">
                                     <i class="fas fa-times"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="Details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Booking 2 -->
-                        <tr>
-                            <td>BK-2023-002</td>
-                            <td>
-                                <strong>Department Meeting</strong>
-                                <div class="booking-details small">
-                                    <div><i class="fas fa-user-tie me-1"></i> Dr. Siti</div>
-                                    <div><i class="fas fa-users me-1"></i> 15 staff</div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-door-open me-2"></i>
-                                    <div>
-                                        <div>Bilik Mesyuarat Utama</div>
-                                        <small class="text-muted">Admin Building</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <img src="https://randomuser.me/api/portraits/women/44.jpg" class="user-avatar">
-                                    <div>
-                                        <div>Siti Nurhaliza</div>
-                                        <small class="text-muted">HOD</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div><i class="fas fa-calendar-day calendar-icon"></i> Tue, 16 Jan 2023</div>
-                                <div><i class="fas fa-clock calendar-icon"></i> 14:00 - 16:00</div>
-                            </td>
-                            <td>
-                                <span class="booking-status">
-                                    <span class="booking-status-dot bg-success"></span>
-                                    Approved
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Cancel">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="Details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Booking 3 -->
-                        <tr>
-                            <td>BK-2023-003</td>
-                            <td>
-                                <strong>Programming Lab</strong>
-                                <div class="booking-details small">
-                                    <div><i class="fas fa-user-tie me-1"></i> Mr. Lim</div>
-                                    <div><i class="fas fa-users me-1"></i> 25 students</div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-door-open me-2"></i>
-                                    <div>
-                                        <div>Makmal Komputer 1</div>
-                                        <small class="text-muted">ICT Building</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <img src="https://randomuser.me/api/portraits/men/75.jpg" class="user-avatar">
-                                    <div>
-                                        <div>Lim Wei Jie</div>
-                                        <small class="text-muted">Lecturer</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div><i class="fas fa-calendar-day calendar-icon"></i> Wed, 17 Jan 2023</div>
-                                <div><i class="fas fa-clock calendar-icon"></i> 10:00 - 12:00</div>
-                            </td>
-                            <td>
-                                <span class="booking-status">
-                                    <span class="booking-status-dot bg-success"></span>
-                                    Approved
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Cancel">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="Details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Booking 4 -->
-                        <tr>
-                            <td>BK-2023-004</td>
-                            <td>
-                                <strong>Sports Day Practice</strong>
-                                <div class="booking-details small">
-                                    <div><i class="fas fa-user-tie me-1"></i> Coach Rajesh</div>
-                                    <div><i class="fas fa-users me-1"></i> Football Team</div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-door-open me-2"></i>
-                                    <div>
-                                        <div>Gelanggang Futsal</div>
-                                        <small class="text-muted">Sports Complex</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <img src="https://randomuser.me/api/portraits/men/22.jpg" class="user-avatar">
-                                    <div>
-                                        <div>Rajesh Kumar</div>
-                                        <small class="text-muted">Coach</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div><i class="fas fa-calendar-day calendar-icon"></i> Thu, 18 Jan 2023</div>
-                                <div><i class="fas fa-clock calendar-icon"></i> 16:00 - 18:00</div>
-                            </td>
-                            <td>
-                                <span class="booking-status">
-                                    <span class="booking-status-dot bg-warning"></span>
-                                    Pending
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-success btn-action me-1" title="Approve">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action me-1" title="Reject">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary btn-action" title="Details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Booking 5 -->
-                        <tr>
-                            <td>BK-2023-005</td>
-                            <td>
-                                <strong>Research Presentation</strong>
-                                <div class="booking-details small">
-                                    <div><i class="fas fa-user-tie me-1"></i> Dr. Tan</div>
-                                    <div><i class="fas fa-users me-1"></i> 8 attendees</div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-door-open me-2"></i>
-                                    <div>
-                                        <div>Seminar Room 2</div>
-                                        <small class="text-muted">Research Building</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <img src="https://randomuser.me/api/portraits/women/63.jpg" class="user-avatar">
-                                    <div>
-                                        <div>Tan Mei Ling</div>
-                                        <small class="text-muted">Researcher</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div><i class="fas fa-calendar-day calendar-icon"></i> Fri, 19 Jan 2023</div>
-                                <div><i class="fas fa-clock calendar-icon"></i> 13:00 - 15:00</div>
-                            </td>
-                            <td>
-                                <span class="booking-status">
-                                    <span class="booking-status-dot bg-danger"></span>
-                                    Rejected
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
+                                </button>-->
+                                <button class="btn btn-sm btn-outline-danger btn-action" 
+                                        title="Delete" 
+                                        data-booking-id="{{ $booking->id }}">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="Details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </td>
-                        </tr>
+                            @endif
+                            @if ($booking->status !== 'pending')
+                            <button
+                                class="btn btn-sm btn-outline-secondary btn-action ms-1"
+                                title="Details"
+                                data-bs-toggle="modal"
+                                data-bs-target="#bookingDetailsModal"
+                                data-purpose-type="{{ $booking->purpose_type }}"
+                                data-purpose="{{ $booking->purpose }}"
+                                data-status="{{ $booking->status }}"
+                                data-user-name="{{ $booking->user->name }}"
+                                data-user-email="{{ $booking->user->email }}"
+                                data-room-name="{{ $booking->room->name }}"
+                                data-room-type="{{ $booking->room->type }}"
+                                data-room-capacity="{{ $booking->room->capacity }}"
+                                data-room-building="{{ $booking->room->building }}"
+                                data-room-description="{{ $booking->room->description }}"
+                                data-booking-date="{{ $booking->booking_date }}"
+                                data-start-time="{{ $booking->start_time }}"
+                                data-end-time="{{ $booking->end_time }}"
+                            >
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
                     </tbody>
                 </table>
             </div>
@@ -574,51 +445,50 @@
                 <div class="modal-body">
                     <div class="row mb-4">
                         <div class="col-md-8">
-                            <h4>CS101 Lecture</h4>
-                            <p class="text-muted">Weekly class for Computer Science students</p>
+                            <h4 id="modalPurposeType">...</h4>
+                            <p class="text-muted" id="modalPurpose">...</p>
                         </div>
                         <div class="col-md-4 text-end">
-                            <span class="badge bg-success fs-6">Approved</span>
+                            <span class="badge bg-secondary fs-6" id="modalStatus">Approved</span>
                         </div>
                     </div>
                     
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h6 class="card-title text-muted">BOOKED BY</h6>
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://randomuser.me/api/portraits/men/32.jpg" class="user-avatar">
-                                        <div>
-                                            <div class="fw-bold">Ahmad bin Abdullah</div>
-                                            <div class="text-muted small">Faculty of Computer Science</div>
-                                            <div class="text-muted small">ahmad.abdullah@university.edu</div>
-                                            <div class="text-muted small">+6012-345 6789</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h6 class="card-title text-muted">ROOM DETAILS</h6>
-                                    <div class="d-flex align-items-center">
-                                        <div class="room-type-icon bg-primary bg-opacity-10 text-primary me-3">
-                                            <i class="fas fa-chalkboard-teacher"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold">Dewan Kuliah 200</div>
-                                            <div class="text-muted small">Academic Building, Floor 2</div>
-                                            <div class="text-muted small">Capacity: 200 people</div>
-                                            <div class="text-muted small">Features: Projector, AC, Sound System</div>
-                                        </div>
+                    <!-- BOOKED BY -->
+                    <div class="w-100 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">BOOKED BY</h6>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-circle fa-2x text-secondary me-2"></i>
+                                    <div>
+                                        <div id="modalUserName" class="fw-bold">...</div>
+                                        <div id="modalUserEmail" class="text-muted small">...</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- ROOM DETAILS -->
+                    <div class="w-100 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">ROOM DETAILS</h6>
+                                <div class="d-flex align-items-center">
+                                    <div class="room-type-icon bg-primary bg-opacity-10 text-primary me-3">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                    </div>
+                                    <div>
+                                        <div id="modalRoomName" class="fw-bold">...</div>
+                                        <div id="modalRoomType" class="text-muted small">...</div>
+                                        <div id="modalRoomBuilding" class="text-muted small">...</div>
+                                        <div id="modalRoomCapacity" class="text-muted small">...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card">
@@ -629,47 +499,18 @@
                                             <i class="fas fa-calendar-day fa-lg"></i>
                                         </div>
                                         <div>
-                                            <div class="fw-bold">Monday, 15 January 2023</div>
-                                            <div class="text-muted">09:00 AM - 12:00 PM (3 hours)</div>
+                                            <div id="modalBookingDate" class="fw-bold">...</div>
+                                            <div id="modalBookingTime" class="text-muted">...</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title text-muted">ATTENDEES</h6>
-                                    <div class="d-flex align-items-center">
-                                        <div class="calendar-icon-large bg-primary bg-opacity-10 text-primary me-3" style="width: 50px; height: 50px; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="fas fa-users fa-lg"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-bold">120 students</div>
-                                            <div class="text-muted">CS101 Class</div>
-                                            <div class="text-muted">Lecturer: Prof. Ahmad</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card mt-3">
-                        <div class="card-body">
-                            <h6 class="card-title text-muted">ADDITIONAL INFORMATION</h6>
-                            <p>Please ensure the projector is working properly before the class starts. We will need the sound system for video presentations.</p>
-                            <div class="d-flex">
-                                <span class="badge bg-light text-dark me-2">Projector</span>
-                                <span class="badge bg-light text-dark me-2">Sound System</span>
-                                <span class="badge bg-light text-dark">AC</span>
-                            </div>
-                        </div>
-                    </div>
+                    </div>-->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Print Details</button>
+                    <!--<button type="button" class="btn btn-primary">Print Details</button>-->
                 </div>
             </div>
         </div>
@@ -686,6 +527,95 @@
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
         });
+
+        document.getElementById('bookingDetailsModal').addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const modal = this;
+
+            // Get values from button attributes
+            const purposeType = button.getAttribute('data-purpose-type');
+            const purpose = button.getAttribute('data-purpose');
+            const status = button.getAttribute('data-status');
+            const userName = button.getAttribute('data-user-name');
+            const userEmail = button.getAttribute('data-user-email');
+            const roomName = button.getAttribute('data-room-name');
+            const roomType = button.getAttribute('data-room-type');
+            const roomCapacity = button.getAttribute('data-room-capacity');
+            const roomBuilding = button.getAttribute('data-room-building');
+            const roomDescription = button.getAttribute('data-room-description');
+            const bookingDate = button.getAttribute('data-booking-date');
+            const startTime = button.getAttribute('data-start-time');
+            const endTime = button.getAttribute('data-end-time');
+
+            // Format date
+            const dateFormatted = new Date(bookingDate).toLocaleDateString('en-GB', {
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+            });
+
+            // Calculate duration
+            const start = new Date(`1970-01-01T${startTime}`);
+            const end = new Date(`1970-01-01T${endTime}`);
+            const diffHours = ((end - start) / 1000 / 60 / 60).toFixed(1);
+
+            // Populate modal
+            modal.querySelector('#modalPurposeType').textContent = purposeType;
+            modal.querySelector('#modalPurpose').textContent = purpose;
+            modal.querySelector('#modalStatus').textContent = status.charAt(0).toUpperCase() + status.slice(1);
+
+            // User
+            modal.querySelector('#modalUserName').textContent = userName;
+            modal.querySelector('#modalUserEmail').textContent = userEmail;
+
+            // Room
+            modal.querySelector('#modalRoomName').textContent = roomName;
+            modal.querySelector('#modalRoomType').textContent = roomType;
+            modal.querySelector('#modalRoomBuilding').textContent = roomBuilding;
+            modal.querySelector('#modalRoomCapacity').textContent = `Capacity: ${roomCapacity}`;
+            modal.querySelector('#modalRoomDescription').textContent = roomDescription;
+
+            // Date & Time
+            modal.querySelector('#modalBookingDate').textContent = dateFormatted;
+            modal.querySelector('#modalBookingTime').textContent = `${startTime} - ${endTime} (${diffHours} hours)`;
+            const statusElement = modal.querySelector('#modalStatus');
+
+            // Remove existing bg-* classes and set new one based on status
+            statusElement.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+
+            if (status === 'approved') {
+                statusElement.classList.add('bg-success');
+            } else if (status === 'pending') {
+                statusElement.classList.add('bg-warning');
+            } else if (status === 'rejected') {
+                statusElement.classList.add('bg-danger');
+            }
+        });
+
+    document.querySelectorAll('.btn-action').forEach(button => {
+        button.addEventListener('click', function () {
+            const bookingId = this.getAttribute('data-booking-id');
+
+            // Send AJAX request to delete booking immediately
+            fetch(`/bookings/${bookingId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // CSRF Token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Or remove the element from the DOM
+                } else {
+                    
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                
+            });
+        });
+    });
     </script>
 </body>
 </html>

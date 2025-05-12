@@ -185,6 +185,20 @@
         .theme-color-option.selected {
             border-color: #495057;
         }
+        .btn-logout {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 1rem;
+        }
+        
+        .btn-logout:hover {
+            background: var(--danger-color);
+        }
         
         .theme-color-1 { background-color: #1a237e; }
         .theme-color-2 { background-color: #0d6efd; }
@@ -202,24 +216,25 @@
         </div>
         <ul class="nav nav-pills flex-column flex-grow-1">
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-users"></i>Manage Users</a>
+                <a href="{{ route('admin.manageuser') }}" class="nav-link"><i class="fas fa-users"></i>Manage Users</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-door-open"></i>Manage Rooms</a>
+                <a href="{{ route('rooms.index') }}" class="nav-link"><i class="fas fa-door-open"></i>Manage Rooms</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-calendar-check"></i>Manage Bookings</a>
+                <a href="{{ route('admin.managebooking') }}" class="nav-link"><i class="fas fa-calendar-check"></i>Manage Bookings</a>
             </li>
+            <!--
             <li class="nav-item">
-                <a href="#" class="nav-link active"><i class="fas fa-cog"></i>Settings</a>
-            </li>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link active"><i class="fas fa-cog"></i>Settings</a>
+            </li>-->
         </ul>
-        <form method="POST" action="{{ route('logout') }}" class="mt-auto px-3 pb-3">
+        <form method="POST" action="{{ route('logout') }}" class="mt-auto px-5">
             @csrf
-            <button type="submit" class="btn btn-logout w-100 py-2">
+            <button type="submit" class="btn btn-logout w-75">
                 <i class="fas fa-sign-out-alt me-2"></i>Logout
             </button>
         </form>
