@@ -194,6 +194,40 @@
             border-radius: 50%;
             margin-right: 6px;
         }
+        .btn-logout {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 1rem;
+        }
+        
+        .btn-logout:hover {
+            background: var(--danger-color);
+        }
+        /* Add to your existing styles */
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            border-radius: 10px 10px 0 0 !important;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #eee;
+            padding: 1rem 1.5rem;
+        }
     </style>
 </head>
 <body>
@@ -205,24 +239,25 @@
         </div>
         <ul class="nav nav-pills flex-column flex-grow-1">
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-users"></i>Manage Users</a>
+                <a href="{{ route('admin.manageuser') }}" class="nav-link"><i class="fas fa-users"></i>Manage Users</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link active"><i class="fas fa-door-open"></i>Manage Rooms</a>
+                <a href="{{ route('rooms.index') }}" class="nav-link active"><i class="fas fa-door-open"></i>Manage Rooms</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-calendar-check"></i>Manage Bookings</a>
+                <a href="{{ route('admin.managebooking') }}" class="nav-link"><i class="fas fa-calendar-check"></i>Manage Bookings</a>
             </li>
+            <!--
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-cog"></i>Settings</a>
-            </li>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="fas fa-cog"></i>Settings</a>
+            </li>-->
         </ul>
-        <form method="POST" action="{{ route('logout') }}" class="mt-auto px-3 pb-3">
+        <form method="POST" action="{{ route('logout') }}" class="mt-auto px-5">
             @csrf
-            <button type="submit" class="btn btn-logout w-100 py-2">
+            <button type="submit" class="btn btn-logout w-75">
                 <i class="fas fa-sign-out-alt me-2"></i>Logout
             </button>
         </form>
@@ -257,19 +292,14 @@
                     <select class="form-select form-select-sm me-2" style="width: 140px;">
                         <option>All Statuses</option>
                         <option>Available</option>
-                        <option>Occupied</option>
                         <option>Maintenance</option>
                     </select>
-                    <button class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-download me-1"></i>Export
-                    </button>
                 </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Room ID</th>
                             <th>Room Name</th>
                             <th>Type</th>
                             <th>Capacity</th>
@@ -279,206 +309,138 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Room 1 -->
+                        @foreach ($rooms as $room)
+                        @php
+                            $typeIcons = [
+                                'Lecture Hall'     => 'fas fa-chalkboard-teacher',
+                                'Meeting Room'     => 'fas fa-users',
+                                'Computer Lab'     => 'fas fa-laptop',
+                                'Sports Facility'  => 'fas fa-running',
+                                'Other'            => 'fas fa-door-open',
+                            ];
+
+                            $typeColors = [
+                                'Lecture Hall'     => 'text-primary bg-primary bg-opacity-10',   // Blue
+                                'Meeting Room'     => 'text-warning bg-warning bg-opacity-10',   // Yellow/Orange
+                                'Computer Lab'     => 'text-info bg-info bg-opacity-10',         // Cyan/Teal
+                                'Sports Facility'  => 'text-success bg-success bg-opacity-10',   // Green
+                                'Other'            => 'text-secondary bg-secondary bg-opacity-10', // Grey
+                            ];
+
+                            $iconClass = $typeIcons[$room->type] ?? 'fas fa-door-open';
+                            $colorClass = $typeColors[$room->type] ?? 'text-dark bg-light';
+                        @endphp
                         <tr>
-                            <td>RM-001</td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <div class="room-type-icon bg-primary bg-opacity-10 text-primary">
-                                        <i class="fas fa-chalkboard-teacher"></i>
+                                    <div class="room-type-icon {{ $colorClass }} me-3 flex-shrink-0">
+                                        <i class="{{ $iconClass }}"></i>
                                     </div>
-                                    <div>
-                                        <h6 class="mb-0">Dewan Kuliah 200</h6>
-                                        <small class="text-muted">Floor 2, Block A</small>
+                                    <div class="d-flex flex-column text-break" style="min-width: 0;">
+                                        <h6 class="mb-0 text-truncate" style="max-width: 200px;">{{ $room->name }}</h6>
+                                        <small class="text-muted text-wrap">{{ Str::words($room->description, 7, '...') }}</small>
                                     </div>
                                 </div>
+                                <style>
+                                    .room-type-icon {
+                                        flex-shrink: 0; /* Prevents icon from shrinking */
+                                    }
+                                    .text-break {
+                                        word-wrap: break-word;
+                                        overflow-wrap: break-word;
+                                    }
+                                </style>
                             </td>
-                            <td>Lecture Hall</td>
+                            <td>{{ $room->type }}</td>
                             <td>
                                 <span class="room-capacity">
-                                    <i class="fas fa-users me-1"></i> 200
+                                    <i class="fas fa-users me-1"></i> {{ $room->capacity }}
                                 </span>
                             </td>
-                            <td>Academic Building</td>
+                            <td>{{ $room->building }}</td>
                             <td>
                                 <span class="room-status">
-                                    <span class="room-status-dot bg-success"></span>
-                                    Available
+                                    <span class="room-status-dot bg-{{ $room->status == 'available' ? 'success' : ($room->status == 'maintenance' ? 'warning' : 'danger') }}"></span>
+                                    {{ ucfirst($room->status) }}
                                 </span>
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
+                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit"
+                                    data-bs-toggle="modal" data-bs-target="#editRoomModal"
+                                    data-id="{{ $room->id }}"
+                                    data-name="{{ $room->name }}"
+                                    data-type="{{ $room->type }}"
+                                    data-capacity="{{ $room->capacity }}"
+                                    data-building="{{ $room->building }}"
+                                    data-status="{{ $room->status }}"
+                                    data-description="{{ $room->description }}"
+                                    onclick="editRoom(this)">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
+                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete" 
+                                    data-id="{{ $room->id }}" onclick="deleteRoom(this)">
                                     <i class="fas fa-trash-alt"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="View Calendar">
-                                    <i class="fas fa-calendar-alt"></i>
                                 </button>
                             </td>
                         </tr>
-                        
-                        <!-- Room 2 -->
-                        <tr>
-                            <td>RM-002</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="room-type-icon bg-info bg-opacity-10 text-info">
-                                        <i class="fas fa-laptop"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Makmal Komputer 1</h6>
-                                        <small class="text-muted">Floor 1, Block B</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Computer Lab</td>
-                            <td>
-                                <span class="room-capacity">
-                                    <i class="fas fa-users me-1"></i> 30
-                                </span>
-                            </td>
-                            <td>ICT Building</td>
-                            <td>
-                                <span class="room-status">
-                                    <span class="room-status-dot bg-success"></span>
-                                    Available
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="View Calendar">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Room 3 -->
-                        <tr>
-                            <td>RM-003</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="room-type-icon bg-warning bg-opacity-10 text-warning">
-                                        <i class="fas fa-users"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Bilik Mesyuarat Utama</h6>
-                                        <small class="text-muted">Floor 3, Block A</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Meeting Room</td>
-                            <td>
-                                <span class="room-capacity">
-                                    <i class="fas fa-users me-1"></i> 20
-                                </span>
-                            </td>
-                            <td>Administration Building</td>
-                            <td>
-                                <span class="room-status">
-                                    <span class="room-status-dot bg-danger"></span>
-                                    Occupied
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="View Calendar">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Room 4 -->
-                        <tr>
-                            <td>RM-004</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="room-type-icon bg-success bg-opacity-10 text-success">
-                                        <i class="fas fa-running"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Gelanggang Futsal</h6>
-                                        <small class="text-muted">Sports Complex</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Sports Facility</td>
-                            <td>
-                                <span class="room-capacity">
-                                    <i class="fas fa-users me-1"></i> 50
-                                </span>
-                            </td>
-                            <td>Sports Center</td>
-                            <td>
-                                <span class="room-status">
-                                    <span class="room-status-dot bg-warning"></span>
-                                    Maintenance
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="View Calendar">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Room 5 -->
-                        <tr>
-                            <td>RM-005</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="room-type-icon bg-secondary bg-opacity-10 text-secondary">
-                                        <i class="fas fa-microscope"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Makmal Sains 3</h6>
-                                        <small class="text-muted">Floor 2, Block C</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>Science Lab</td>
-                            <td>
-                                <span class="room-capacity">
-                                    <i class="fas fa-users me-1"></i> 25
-                                </span>
-                            </td>
-                            <td>Science Building</td>
-                            <td>
-                                <span class="room-status">
-                                    <span class="room-status-dot bg-success"></span>
-                                    Available
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary btn-action ms-1" title="View Calendar">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
+                        @endforeach
                     </tbody>
+                    <script>
+                        function deleteRoom(button) {
+                            // Get the room ID from the button's data-id attribute
+                            var roomId = button.getAttribute('data-id');
+                            
+                            // Confirm with the user before deletion
+                            if (confirm('Are you sure you want to delete this room?')) {
+                                // Create a form to send the DELETE request to the server
+                                var form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = '/rooms/' + roomId; // Assuming you have a route like /rooms/{id}
+
+                                // Create a CSRF token input field (Laravel requires CSRF tokens for POST, PUT, DELETE requests)
+                                var csrfToken = document.createElement('input');
+                                csrfToken.type = 'hidden';
+                                csrfToken.name = '_token';
+                                csrfToken.value = '{{ csrf_token() }}'; // Laravel's CSRF token helper
+
+                                // Create the DELETE method input field (Laravel uses method spoofing)
+                                var methodInput = document.createElement('input');
+                                methodInput.type = 'hidden';
+                                methodInput.name = '_method';
+                                methodInput.value = 'DELETE';
+
+                                // Append the CSRF token and method input to the form
+                                form.appendChild(csrfToken);
+                                form.appendChild(methodInput);
+
+                                // Append the form to the body and submit it
+                                document.body.appendChild(form);
+                                form.submit();
+                            }
+                        }
+
+                        function editRoom(button) {
+                            // Get all data attributes from the button
+                            const roomId = button.getAttribute('data-id');
+                            const roomName = button.getAttribute('data-name');
+                            const roomType = button.getAttribute('data-type');
+                            const roomCapacity = button.getAttribute('data-capacity');
+                            const building = button.getAttribute('data-building');
+                            const status = button.getAttribute('data-status');
+                            const description = button.getAttribute('data-description');
+                            
+                            // Set the form action URL with the room ID
+                            document.getElementById('editRoomForm').action = `/rooms/${roomId}`;
+                            
+                            // Populate the form fields
+                            document.getElementById('editRoomName').value = roomName;
+                            document.getElementById('editRoomType').value = roomType;
+                            document.getElementById('editRoomCapacity').value = roomCapacity;
+                            document.getElementById('editBuilding').value = building;
+                            document.getElementById('editRoomStatus').value = status;
+                            document.getElementById('editRoomDescription').value = description;
+                        }
+                    </script>
                 </table>
             </div>
             
@@ -511,21 +473,21 @@
                     <h5 class="modal-title" id="addRoomModalLabel">Add New Room</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form>
+                <form action="{{ route('rooms.store') }}" method="POST">
+                @csrf
                     <div class="modal-body">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="roomName" class="form-label">Room Name</label>
-                                <input type="text" class="form-control" id="roomName" placeholder="e.g. Dewan Kuliah 100" required>
+                                <input type="text" class="form-control" id="roomName" name="name" placeholder="e.g. Dewan Kuliah 100" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="roomType" class="form-label">Room Type</label>
-                                <select class="form-select" id="roomType" required>
+                                <select class="form-select" id="roomType" name="type" required>
                                     <option value="">Select type</option>
                                     <option>Lecture Hall</option>
                                     <option>Meeting Room</option>
                                     <option>Computer Lab</option>
-                                    <option>Science Lab</option>
                                     <option>Sports Facility</option>
                                     <option>Other</option>
                                 </select>
@@ -535,48 +497,89 @@
                         <div class="row mb-3">
                             <div class="col-md-4">
                                 <label for="roomCapacity" class="form-label">Capacity</label>
-                                <input type="number" class="form-control" id="roomCapacity" min="1" required>
+                                <input type="number" class="form-control" id="roomCapacity" name="capacity" min="1" required>
                             </div>
                             <div class="col-md-4">
                                 <label for="building" class="form-label">Building</label>
-                                <input type="text" class="form-control" id="building" placeholder="e.g. Block A" required>
+                                <input type="text" class="form-control" id="building" name="building" placeholder="e.g. Block A" required>
                             </div>
                             <div class="col-md-4">
-                                <label for="floor" class="form-label">Floor</label>
-                                <input type="text" class="form-control" id="floor" placeholder="e.g. Floor 2">
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
                                 <label for="roomStatus" class="form-label">Status</label>
-                                <select class="form-select" id="roomStatus" required>
+                                <select class="form-select" id="roomStatus" name="status" required>
                                     <option value="available">Available</option>
                                     <option value="maintenance">Under Maintenance</option>
-                                    <option value="occupied">Occupied</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="roomFeatures" class="form-label">Features</label>
-                                <select class="form-select" id="roomFeatures" multiple>
-                                    <option>Projector</option>
-                                    <option>Whiteboard</option>
-                                    <option>Air Conditioner</option>
-                                    <option>Sound System</option>
-                                    <option>Computers</option>
-                                    <option>WiFi</option>
                                 </select>
                             </div>
                         </div>
-                        
                         <div class="mb-3">
                             <label for="roomDescription" class="form-label">Description</label>
-                            <textarea class="form-control" id="roomDescription" rows="3"></textarea>
+                            <textarea class="form-control" id="roomDescription"  name="description" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Add Room</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Room Modal -->
+    <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editRoomModalLabel">Edit Room</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editRoomForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editRoomName" class="form-label">Room Name</label>
+                                <input type="text" class="form-control" id="editRoomName" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editRoomType" class="form-label">Room Type</label>
+                                <select class="form-select" id="editRoomType" name="type" required>
+                                    <option value="">Select type</option>
+                                    <option>Lecture Hall</option>
+                                    <option>Meeting Room</option>
+                                    <option>Computer Lab</option>
+                                    <option>Sports Facility</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="editRoomCapacity" class="form-label">Capacity</label>
+                                <input type="number" class="form-control" id="editRoomCapacity" name="capacity" min="1" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="editBuilding" class="form-label">Building</label>
+                                <input type="text" class="form-control" id="editBuilding" name="building" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="editRoomStatus" class="form-label">Status</label>
+                                <select class="form-select" id="editRoomStatus" name="status" required>
+                                    <option value="available">Available</option>
+                                    <option value="maintenance">Under Maintenance</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editRoomDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="editRoomDescription" name="description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
                     </div>
                 </form>
             </div>

@@ -170,20 +170,21 @@
         </div>
         <ul class="nav nav-pills flex-column flex-grow-1">
             <li class="nav-item">
-                <a href="#" class="nav-link active"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link active"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-users"></i>Manage Users</a>
+                <a href="{{ route('admin.manageuser') }}" class="nav-link"><i class="fas fa-users"></i>Manage Users</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-door-open"></i>Manage Rooms</a>
+                <a href="{{ route('rooms.index') }}" class="nav-link"><i class="fas fa-door-open"></i>Manage Rooms</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-calendar-check"></i>Manage Bookings</a>
+                <a href="{{ route('admin.managebooking') }}" class="nav-link"><i class="fas fa-calendar-check"></i>Manage Bookings</a>
             </li>
+            <!--
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-cog"></i>Settings</a>
-            </li>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="fas fa-cog"></i>Settings</a>
+            </li>-->
         </ul>
         <form method="POST" action="{{ route('logout') }}" class="mt-auto px-5">
             @csrf
@@ -217,12 +218,9 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h5 class="card-title">TOTAL USERS</h5>
-                                <p class="card-text">142</p>
+                                <p class="card-text">{{ $totalUsers - 1}}</p>
                             </div>
                             <i class="fas fa-users fa-2x opacity-50"></i>
-                        </div>
-                        <div class="mt-2">
-                            <span class="small">+12% from last month</span>
                         </div>
                     </div>
                 </div>
@@ -233,12 +231,9 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h5 class="card-title">TODAY'S BOOKINGS</h5>
-                                <p class="card-text">27</p>
+                                <p class="card-text">{{ $todaysBookings }}</p>
                             </div>
                             <i class="fas fa-calendar-check fa-2x opacity-50"></i>
-                        </div>
-                        <div class="mt-2">
-                            <span class="small">+3 from yesterday</span>
                         </div>
                     </div>
                 </div>
@@ -249,12 +244,9 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h5 class="card-title">AVAILABLE ROOMS</h5>
-                                <p class="card-text">14</p>
+                                <p class="card-text">{{ $availableRooms }}</p>
                             </div>
                             <i class="fas fa-door-open fa-2x opacity-50"></i>
-                        </div>
-                        <div class="mt-2">
-                            <span class="small">3 currently in maintenance</span>
                         </div>
                     </div>
                 </div>

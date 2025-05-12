@@ -163,6 +163,20 @@
         .pagination .page-item.active .page-link {
             background-color: var(--primary-color);
         }
+        .btn-logout {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 1rem;
+        }
+        
+        .btn-logout:hover {
+            background: var(--danger-color);
+        }
     </style>
 </head>
 <body>
@@ -174,24 +188,25 @@
         </div>
         <ul class="nav nav-pills flex-column flex-grow-1">
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link active"><i class="fas fa-users"></i>Manage Users</a>
+                <a href="{{ route('admin.manageuser') }}" class="nav-link active"><i class="fas fa-users"></i>Manage Users</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-door-open"></i>Manage Rooms</a>
+                <a href="{{ route('rooms.index') }}" class="nav-link"><i class="fas fa-door-open"></i>Manage Rooms</a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-calendar-check"></i>Manage Bookings</a>
+                <a href="{{ route('admin.managebooking') }}" class="nav-link"><i class="fas fa-calendar-check"></i>Manage Bookings</a>
             </li>
+            <!--
             <li class="nav-item">
-                <a href="#" class="nav-link"><i class="fas fa-cog"></i>Settings</a>
-            </li>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link"><i class="fas fa-cog"></i>Settings</a>
+            </li>-->
         </ul>
-        <form method="POST" action="{{ route('logout') }}" class="mt-auto px-3 pb-3">
+        <form method="POST" action="{{ route('logout') }}" class="mt-auto px-5">
             @csrf
-            <button type="submit" class="btn btn-logout w-100 py-2">
+            <button type="submit" class="btn btn-logout w-75">
                 <i class="fas fa-sign-out-alt me-2"></i>Logout
             </button>
         </form>
@@ -206,26 +221,12 @@
                     <i class="fas fa-search"></i>
                     <input type="text" class="form-control" placeholder="Search users...">
                 </div>
-                <button class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i>Add User
-                </button>
             </div>
         </div>
         
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">All Users</h5>
-                <div class="d-flex">
-                    <select class="form-select form-select-sm me-2" style="width: 120px;">
-                        <option>Filter by</option>
-                        <option>Active</option>
-                        <option>Inactive</option>
-                        <option>Admins</option>
-                    </select>
-                    <button class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-download me-1"></i>Export
-                    </button>
-                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover">
@@ -233,152 +234,44 @@
                         <tr>
                             <th>#</th>
                             <th>User</th>
+                            <th>Name</th>
                             <th>Email</th>
                             <th>Phone</th>
-                            <th>Role</th>
-                            <th>Status</th>
+                            <th>IC Number</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- User 1 -->
+                        <!-- User -->
                         <tr>
-                            <td>1</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
-                                        <i class="fas fa-user text-white"></i>
+                            @foreach ($users as $index => $user)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ $user->full_name }}</h6>
+                                            <small class="text-muted">{{ $user->ic_number }}</small>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h6 class="mb-0">Ahmad bin Abdullah</h6>
-                                        <small class="text-muted">901025-14-5678</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>ahmad.abdullah@example.com</td>
-                            <td>+6012-345 6789</td>
-                            <td><span class="badge bg-primary bg-opacity-10 text-primary">Admin</span></td>
-                            <td><span class="badge bg-success bg-opacity-10 text-success">Active</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- User 2 -->
-                        <tr>
-                            <td>2</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar bg-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
-                                        <i class="fas fa-user text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Siti Nurhaliza</h6>
-                                        <small class="text-muted">900305-08-1234</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>siti.nurhaliza@example.com</td>
-                            <td>+6013-456 7890</td>
-                            <td><span class="badge bg-info bg-opacity-10 text-info">Staff</span></td>
-                            <td><span class="badge bg-success bg-opacity-10 text-success">Active</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- User 3 -->
-                        <tr>
-                            <td>3</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar bg-warning rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
-                                        <i class="fas fa-user text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Lim Wei Jie</h6>
-                                        <small class="text-muted">950712-10-5678</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>lim.weijie@example.com</td>
-                            <td>+6011-234 5678</td>
-                            <td><span class="badge bg-secondary bg-opacity-10 text-secondary">Student</span></td>
-                            <td><span class="badge bg-success bg-opacity-10 text-success">Active</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- User 4 -->
-                        <tr>
-                            <td>4</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar bg-danger rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
-                                        <i class="fas fa-user text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Rajesh Kumar</h6>
-                                        <small class="text-muted">880430-05-1234</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>rajesh.kumar@example.com</td>
-                            <td>+6016-789 0123</td>
-                            <td><span class="badge bg-secondary bg-opacity-10 text-secondary">Student</span></td>
-                            <td><span class="badge bg-warning bg-opacity-10 text-warning">Pending</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        
-                        <!-- User 5 -->
-                        <tr>
-                            <td>5</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar bg-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
-                                        <i class="fas fa-user text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">Tan Mei Ling</h6>
-                                        <small class="text-muted">920815-14-9876</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>tan.meiling@example.com</td>
-                            <td>+6017-890 1234</td>
-                            <td><span class="badge bg-info bg-opacity-10 text-info">Staff</span></td>
-                            <td><span class="badge bg-danger bg-opacity-10 text-danger">Inactive</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
+                                </td>
+                                <td>{{ $user->name }}</td>
+                                <td>{{ $user->email }}</td>
+                                <td>{{ $user->phone_number ?? "-" }}</td>
+                                <td>{{ $user->ic_number ?? "-"}}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            @endforeach
                         </tr>
                     </tbody>
                 </table>

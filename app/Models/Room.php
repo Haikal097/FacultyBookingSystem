@@ -13,8 +13,14 @@ class Room extends Model
         'name',
         'type',
         'capacity',
-        'package',
-        'location',
+        'building',
+        'status',
+        'description',
     ];
+
+    public function bookings()
+{
+    return $this->hasMany(Booking::class);
+}
 }
 
