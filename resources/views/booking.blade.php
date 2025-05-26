@@ -590,7 +590,7 @@
 
                         <!-- Submit and Price -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
-                            <input type="text" name="total_price" id="total_price" value="0.00">
+                            <input type="hidden" name="total_price" id="total_price" value="0.00">
                             <div class="price-info">
                                 <strong>Total Price:</strong> RM <span id="pricePlaceholder">0.00</span>
                             </div>
@@ -667,7 +667,6 @@
                 const totalPrice = roundedHours * window.bookingData.pricePerHour;
                 priceDisplay.textContent = totalPrice.toFixed(2);
                 priceHiddenInput.value = totalPrice.toFixed(2); // Update the hidden input here
-             alert(`Total Price: RM ${totalPrice.toFixed(2)}`);
             } else {
                 priceDisplay.textContent = '0.00';
                 priceHiddenInput.value = '0.00';
