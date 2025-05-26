@@ -11,7 +11,22 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::where('role', '!=', 2)->get(); // Excludes users with role 2
+        $query = User::where('role', '!=', 2); // Maintain your existing role filter
+
+        // Apply search filter if search term exists
+        if (request()->filled('search')) {
+            $search = request('search');
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone_number', 'like', "%{$search}%")
+                ->orWhere('ic_number', 'like', "%{$search}%")
+                ->orWhere('name', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->paginate(8); // Maintain your 8 items per page
+
         return view('admin.manageuser', compact('users'));
     }
     public function edit()

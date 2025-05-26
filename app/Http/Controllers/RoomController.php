@@ -15,6 +15,7 @@ class RoomController extends Controller
             'capacity' => 'required|integer|min:1',
             'building' => 'required|string|max:255',
             'status' => 'required|in:available,maintenance,occupied',
+            'price_per_hour' => 'required|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 
@@ -25,8 +26,32 @@ class RoomController extends Controller
 
     public function index()
     {
-        $rooms = Room::all(); // Fetch all rooms
-        return view('admin.manageroom', compact('rooms')); // Pass to view
+        $query = Room::query()->orderBy('created_at', 'desc');
+
+        // Apply type filter if selected and not "All Types"
+        if (request()->filled('type') && request('type') !== 'All Types') {
+            $query->where('type', request('type'));
+        }
+
+        // Apply status filter if selected and not "All Statuses"
+        if (request()->filled('status') && request('status') !== 'All Statuses') {
+            $query->where('status', strtolower(request('status')));
+        }
+
+        // Apply search filter if search term exists
+        if (request()->filled('search')) {
+            $search = request('search');
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                ->orWhere('building', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%")
+                ->orWhere('type', 'like', "%{$search}%");
+            });
+        }
+
+        $rooms = $query->paginate(8); // Maintain your 8 items per page
+
+        return view('admin.manageroom', compact('rooms'));
     }
 
     public function destroy(Room $room)
@@ -47,6 +72,7 @@ class RoomController extends Controller
             'capacity'    => 'required|integer|min:1',
             'building'    => 'required|string|max:255',
             'status'      => 'required|in:available,maintenance',
+            'price_per_hour' => 'required|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 

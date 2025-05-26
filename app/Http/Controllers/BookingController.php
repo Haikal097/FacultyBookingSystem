@@ -38,7 +38,9 @@ class BookingController extends Controller
             'end_time' => 'required|after:start_time',
             'purpose_type' => 'required|string|max:255',
             'purpose' => 'required|string',
+            'total_price' => 'required|numeric|min:0',
         ]);
+
 
         // Check for conflicting bookings
         $conflict = Booking::where('room_id', $validated['room_id'])
@@ -61,7 +63,7 @@ class BookingController extends Controller
 
         // Create the booking
         $booking = Auth::user()->bookings()->create($validated);
-
+        
         // Redirect with success message
         return redirect()->route('userprofile')
                          ->with('success', 'Booking created successfully!');
@@ -69,16 +71,101 @@ class BookingController extends Controller
 
     public function index()
     {
-        $bookings = Booking::with(['room', 'user'])->latest()->get();
+        $query = Booking::with(['room', 'user'])
+            ->orderBy('created_at', 'desc');
+
+        // Apply search filter if search term exists
+        if (request()->has('search')) {
+            $search = request('search');
+            $query->where(function($q) use ($search) {
+                $q->where('purpose', 'like', "%{$search}%")
+                ->orWhere('purpose_type', 'like', "%{$search}%")
+                ->orWhereHas('user', function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })
+                ->orWhereHas('room', function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('building', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // Apply time period or status filters
+        if (request()->has('filter')) {
+            $filter = request('filter');
+            
+            switch ($filter) {
+                case 'today':
+                    $query->whereDate('booking_date', today());
+                    break;
+                case 'this_week':
+                    $query->whereBetween('booking_date', [
+                        now()->startOfWeek(),
+                        now()->endOfWeek()
+                    ]);
+                    break;
+                case 'this_month':
+                    $query->whereBetween('booking_date', [
+                        now()->startOfMonth(),
+                        now()->endOfMonth()
+                    ]);
+                    break;
+                case 'pending':
+                case 'approved':
+                case 'rejected':
+                    $query->where('status', $filter);
+                    break;
+            }
+        }
+
+        $bookings = $query->paginate(8);
+
         return view('admin.managebooking', compact('bookings'));
     }
 
     public function myBookings()
     {
-        $bookings = Booking::where('user_id', Auth::id())->with(['room', 'user'])->get();
+        $query = Booking::where('user_id', Auth::id())
+            ->with(['room', 'user'])
+            ->orderBy('created_at', 'desc');
+
+        // Apply status filter if selected
+        if (request()->filled('status')) {
+            $query->where('status', request('status'));
+        }
+
+        // Apply date range filter
+        if (request()->filled('date_from')) {
+            $query->whereDate('booking_date', '>=', request('date_from'));
+        }
+        if (request()->filled('date_to')) {
+            $query->whereDate('booking_date', '<=', request('date_to'));
+        }
+
+        // Apply facility type filter
+        if (request()->filled('facility_type')) {
+            $query->whereHas('room', function($q) {
+                $q->where('type', request('facility_type'));
+            });
+        }
+
+        // Apply search filter
+        if (request()->filled('search')) {
+            $search = request('search');
+            $query->where(function($q) use ($search) {
+                $q->where('purpose', 'like', "%{$search}%")
+                ->orWhere('purpose_type', 'like', "%{$search}%")
+                ->orWhereHas('room', function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        $bookings = $query->paginate(8);
+
         return view('userprofile', compact('bookings'));
     }
-
     public function approve($id)
     {
         $booking = Booking::findOrFail($id);

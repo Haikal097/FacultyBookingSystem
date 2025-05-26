@@ -211,6 +211,22 @@
         .btn-logout:hover {
             background: var(--danger-color);
         }
+        .pagination {
+            margin-bottom: 0;
+        }
+
+        .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .page-link {
+            color: #0d6efd;
+        }
+        .dropdown-item.active-filter {
+            background-color: #e9ecef;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -252,21 +268,49 @@
             <h2>Manage Bookings</h2>
             <div class="d-flex align-items-center">
                 <div class="search-box me-3">
-                    <i class="fas fa-search"></i>
-                    <input type="text" class="form-control" placeholder="Search bookings...">
+                    <form action="{{ url()->current() }}" method="GET" class="search-box me-3">
+                        <i class="fas fa-search"></i>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            placeholder="Search bookings..." 
+                            name="search"
+                            value="{{ request('search') }}"
+                        >
+                        @if(request()->has('filter'))
+                            <input type="hidden" name="filter" value="{{ request('filter') }}">
+                        @endif
+                    </form>
                 </div>
                 <div class="btn-group me-3">
                     <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-filter me-1"></i> Filter
+                        <i class="fas fa-filter me-1"></i> 
+                        @if(request()->has('filter'))
+                            {{ ucfirst(str_replace('_', ' ', request('filter'))) }}
+                        @else
+                            Filter
+                        @endif
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Today</a></li>
-                        <li><a class="dropdown-item" href="#">This Week</a></li>
-                        <li><a class="dropdown-item" href="#">This Month</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Pending Approval</a></li>
-                        <li><a class="dropdown-item" href="#">Approved</a></li>
-                        <li><a class="dropdown-item" href="#">Rejected</a></li>
+                        @foreach([
+                            'today' => 'Today',
+                            'this_week' => 'This Week',
+                            'this_month' => 'This Month',
+                            'pending' => 'Pending Approval',
+                            'approved' => 'Approved',
+                            'rejected' => 'Rejected'
+                        ] as $value => $label)
+                            <li>
+                                <a class="dropdown-item @if(request('filter') == $value) active-filter @endif" 
+                                href="{{ request()->fullUrlWithQuery(['filter' => $value]) }}">
+                                    {{ $label }}
+                                </a>
+                            </li>
+                        @endforeach
+                        @if(request()->has('filter'))
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ request()->url() }}">Clear Filter</a></li>
+                        @endif
                     </ul>
                 </div>
             </div>
@@ -284,6 +328,7 @@
                             <th>Facility</th>
                             <th>User</th>
                             <th>Date & Time</th>
+                            <th>Price</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -326,6 +371,9 @@
                                 <i class="fas fa-clock calendar-icon"></i>
                                 {{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}
                             </div>
+                        </td>
+                        <td>
+                            RM {{ number_format($booking->total_price, 2) }}
                         </td>
                         <td>
                             @php
@@ -413,21 +461,44 @@
             
             <div class="card-footer d-flex justify-content-between align-items-center">
                 <div class="text-muted">
-                    Showing 1 to 5 of 23 bookings
+                    Showing {{ $bookings->firstItem() }} to {{ $bookings->lastItem() }} of {{ $bookings->total() }} bookings
                 </div>
                 <nav aria-label="Page navigation">
                     <ul class="pagination mb-0">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Previous</a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">4</a></li>
-                        <li class="page-item"><a class="page-link" href="#">5</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Next</a>
-                        </li>
+                        {{-- Previous Page Link --}}
+                        @if ($bookings->onFirstPage())
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                        @else
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $bookings->previousPageUrl() }}" rel="prev">Previous</a>
+                            </li>
+                        @endif
+
+                        {{-- Pagination Elements --}}
+                        @foreach ($bookings->getUrlRange(1, $bookings->lastPage()) as $page => $url)
+                            @if ($page == $bookings->currentPage())
+                                <li class="page-item active">
+                                    <span class="page-link">{{ $page }}</span>
+                                </li>
+                            @else
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                                </li>
+                            @endif
+                        @endforeach
+
+                        {{-- Next Page Link --}}
+                        @if ($bookings->hasMorePages())
+                            <li class="page-item">
+                                <a class="page-link" href="{{ $bookings->nextPageUrl() }}" rel="next">Next</a>
+                            </li>
+                        @else
+                            <li class="page-item disabled">
+                                <span class="page-link">Next</span>
+                            </li>
+                        @endif
                     </ul>
                 </nav>
             </div>

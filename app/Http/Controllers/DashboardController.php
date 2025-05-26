@@ -12,14 +12,26 @@ use Carbon\Carbon;
 class DashboardController extends Controller
 {
     public function index()
-{
-    $totalUsers = User::count();
+    {
+        // Existing metrics
+        $totalUsers = User::count();
+        $todaysBookings = Booking::whereDate('created_at', Carbon::today())->count();
+        $availableRooms = Room::where('status', 'available')->count();
+        $maintenanceRooms = Room::where('status', 'maintenance')->count();
 
-    $todaysBookings = Booking::whereDate('created_at', Carbon::today())->count();
+        // Recent pending bookings (last 3)
+        $pendingBookings = Booking::where('status', 'pending')
+            ->with(['room', 'user'])
+            ->latest()
+            ->take(3)
+            ->get();
 
-    $availableRooms = Room::where('status', 'available')->count();
-    $maintenanceRooms = Room::where('status', 'maintenance')->count();
-
-    return view('admin.dashboard', compact('totalUsers', 'todaysBookings', 'availableRooms', 'maintenanceRooms'));
-}
+        return view('admin.dashboard', compact(
+            'totalUsers',
+            'todaysBookings',
+            'availableRooms',
+            'maintenanceRooms',
+            'pendingBookings'
+        ));
+    }
 }

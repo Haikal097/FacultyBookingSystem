@@ -217,10 +217,19 @@
         <div class="header">
             <h2>Manage Users</h2>
             <div class="d-flex align-items-center">
-                <div class="search-box me-3">
+                <form method="GET" action="{{ url()->current() }}" class="search-box me-3">
+                    @csrf
+                    <div class="search-box me-3 position-relative">
                     <i class="fas fa-search"></i>
-                    <input type="text" class="form-control" placeholder="Search users...">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        class="form-control" 
+                        placeholder="Search users..."
+                        value="{{ request('search') }}"
+                    >
                 </div>
+                </form>
             </div>
         </div>
         
@@ -238,68 +247,77 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>IC Number</th>
-                            <th>Actions</th>
+                            <!--<th>Actions</th>-->
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- User -->
+                        @foreach ($users as $index => $user)
                         <tr>
-                            @foreach ($users as $index => $user)
-                            <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
-                                            <i class="fas fa-user text-white"></i>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-0">{{ $user->full_name }}</h6>
-                                            <small class="text-muted">{{ $user->ic_number }}</small>
-                                        </div>
+                            <td>{{ $users->firstItem() + $index }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
+                                        <i class="fas fa-user text-white"></i>
                                     </div>
-                                </td>
-                                <td>{{ $user->name }}</td>
-                                <td>{{ $user->email }}</td>
-                                <td>{{ $user->phone_number ?? "-" }}</td>
-                                <td>{{ $user->ic_number ?? "-"}}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            @endforeach
+                                    <div>
+                                        <h6 class="mb-0">{{ $user->full_name }}</h6>
+                                        <small class="text-muted">{{ $user->ic_number }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ $user->name }}</td>
+                            <td>{{ $user->email }}</td>
+                            <td>{{ $user->phone_number ?? "-" }}</td>
+                            <td>{{ $user->ic_number ?? "-"}}</td>
+                            <!--
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>-->
                         </tr>
+                        @endforeach
                     </tbody>
+
                 </table>
             </div>
             
             <div class="card-footer d-flex justify-content-between align-items-center">
                 <div class="text-muted">
-                    Showing 1 to 5 of 25 entries
+                    Showing {{ $users->firstItem() }} to {{ $users->lastItem() }} of {{ $users->total() }} entries
                 </div>
                 <nav aria-label="Page navigation">
-                    <ul class="pagination mb-0">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Previous</a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">4</a></li>
-                        <li class="page-item"><a class="page-link" href="#">5</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Next</a>
-                        </li>
-                    </ul>
+                    {{ $users->appends(request()->query())->links() }}
                 </nav>
             </div>
         </div>
     </div>
-
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[name="search"]');
+        const searchForm = document.querySelector('.search-box');
+        let searchTimer;
+        
+        // Submit form when user stops typing (500ms delay)
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                searchForm.submit();
+            }, 500);
+        });
+        
+        // Also allow pressing Enter to submit immediately
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                clearTimeout(searchTimer);
+                searchForm.submit();
+            }
+        });
+    });
+    </script>
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

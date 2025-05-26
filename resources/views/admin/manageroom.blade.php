@@ -228,6 +228,28 @@
             border-top: 1px solid #eee;
             padding: 1rem 1.5rem;
         }
+
+        /* Set fixed width for actions column */
+        table th:nth-child(5),
+        table td:nth-child(5) {  /* Price column */
+            width: 120px;
+            min-width: 120px;
+        }
+
+        table th:nth-child(7),
+        table td:nth-child(7) {
+            width: 120px; /* Adjust as needed */
+            min-width: 120px;
+            white-space: nowrap;
+        }
+        
+        /* Add spacing between action buttons */
+        .btn-action {
+            margin-right: 6px; /* Space between buttons */
+        }
+        .btn-action:last-child {
+            margin-right: 0;
+        }
     </style>
 </head>
 <body>
@@ -267,33 +289,52 @@
     <div class="content">
         <div class="header">
             <h2>Manage Rooms</h2>
-            <div class="d-flex align-items-center">
-                <div class="search-box me-3">
-                    <i class="fas fa-search"></i>
-                    <input type="text" class="form-control" placeholder="Search rooms...">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: transparent; border-bottom: none;">
+                    <!-- Your existing title and filters -->
+                    <form method="GET" class="ms-auto me-3">
+                        <div class="input-group input-group-sm" style="width: 250px;">
+                            <input type="text" name="search" class="form-control" placeholder="Search rooms..." 
+                                value="{{ request('search') }}">
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                        <i class="fas fa-plus me-2"></i>Add Room
+                    </button>
                 </div>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal">
-                    <i class="fas fa-plus me-2"></i>Add Room
-                </button>
-            </div>
         </div>
         
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">All Rooms</h5>
                 <div class="d-flex">
-                    <select class="form-select form-select-sm me-2" style="width: 150px;">
-                        <option>All Types</option>
-                        <option>Lecture Hall</option>
-                        <option>Meeting Room</option>
-                        <option>Computer Lab</option>
-                        <option>Sports Facility</option>
-                    </select>
-                    <select class="form-select form-select-sm me-2" style="width: 140px;">
-                        <option>All Statuses</option>
-                        <option>Available</option>
-                        <option>Maintenance</option>
-                    </select>
+                    <form id="filterForm" method="GET" class="d-flex">
+                        <select name="type" class="form-select form-select-sm me-2" style="width: 150px;" onchange="this.form.submit()">
+                            <option value="All Types" {{ request('type') == 'All Types' ? 'selected' : '' }}>All Types</option>
+                            <option value="Lecture Hall" {{ request('type') == 'Lecture Hall' ? 'selected' : '' }}>Lecture Hall</option>
+                            <option value="Meeting Room" {{ request('type') == 'Meeting Room' ? 'selected' : '' }}>Meeting Room</option>
+                            <option value="Computer Lab" {{ request('type') == 'Computer Lab' ? 'selected' : '' }}>Computer Lab</option>
+                            <option value="Sports Facility" {{ request('type') == 'Sports Facility' ? 'selected' : '' }}>Sports Facility</option>
+                        </select>
+                        <select name="status" class="form-select form-select-sm me-2" style="width: 140px;" onchange="this.form.submit()">
+                            <option value="All Statuses" {{ request('status') == 'All Statuses' ? 'selected' : '' }}>All Statuses</option>
+                            <option value="Available" {{ request('status') == 'Available' ? 'selected' : '' }}>Available</option>
+                            <option value="Maintenance" {{ request('status') == 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
+                        </select>
+                        
+                        <!-- Hidden fields to preserve other query parameters -->
+                        @if(request()->has('search'))
+                            <input type="hidden" name="search" value="{{ request('search') }}">
+                        @endif
+                        @if(request()->has('type') || request()->has('status'))
+                            <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-secondary ms-2">
+                                Reset Filters
+                            </a>
+                        @endif
+                    </form>
                 </div>
             </div>
             <div class="table-responsive">
@@ -304,6 +345,7 @@
                             <th>Type</th>
                             <th>Capacity</th>
                             <th>Building</th>
+                            <th>Price</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -359,6 +401,9 @@
                             </td>
                             <td>{{ $room->building }}</td>
                             <td>
+                                RM {{ number_format($room->price_per_hour, 2) }}
+                            </td>
+                            <td>
                                 <span class="room-status">
                                     <span class="room-status-dot bg-{{ $room->status == 'available' ? 'success' : ($room->status == 'maintenance' ? 'warning' : 'danger') }}"></span>
                                     {{ ucfirst($room->status) }}
@@ -373,6 +418,7 @@
                                     data-capacity="{{ $room->capacity }}"
                                     data-building="{{ $room->building }}"
                                     data-status="{{ $room->status }}"
+                                    data-price="{{ $room->price_per_hour }}"
                                     data-description="{{ $room->description }}"
                                     onclick="editRoom(this)">
                                     <i class="fas fa-edit"></i>
@@ -428,6 +474,7 @@
                             const building = button.getAttribute('data-building');
                             const status = button.getAttribute('data-status');
                             const description = button.getAttribute('data-description');
+                            const price = button.getAttribute('data-price');
                             
                             // Set the form action URL with the room ID
                             document.getElementById('editRoomForm').action = `/rooms/${roomId}`;
@@ -439,6 +486,7 @@
                             document.getElementById('editBuilding').value = building;
                             document.getElementById('editRoomStatus').value = status;
                             document.getElementById('editRoomDescription').value = description;
+                            document.getElementById('editRoomPrice').value = price;
                         }
                     </script>
                 </table>
@@ -446,20 +494,10 @@
             
             <div class="card-footer d-flex justify-content-between align-items-center">
                 <div class="text-muted">
-                    Showing 1 to 5 of 15 rooms
+                    Showing {{ $rooms->firstItem() }} to {{ $rooms->lastItem() }} of {{ $rooms->total() }} rooms
                 </div>
                 <nav aria-label="Page navigation">
-                    <ul class="pagination mb-0">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" tabindex="-1">Previous</a>
-                        </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">Next</a>
-                        </li>
-                    </ul>
+                    {{ $rooms->appends(request()->query())->links() }}
                 </nav>
             </div>
         </div>
@@ -474,7 +512,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('rooms.store') }}" method="POST">
-                @csrf
+                    @csrf
                     <div class="modal-body">
                         <div class="row mb-3">
                             <div class="col-md-6">
@@ -495,15 +533,22 @@
                         </div>
                         
                         <div class="row mb-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="roomCapacity" class="form-label">Capacity</label>
                                 <input type="number" class="form-control" id="roomCapacity" name="capacity" min="1" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="building" class="form-label">Building</label>
                                 <input type="text" class="form-control" id="building" name="building" placeholder="e.g. Block A" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label for="roomPrice" class="form-label">Price (RM/hour)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">RM</span>
+                                    <input type="number" class="form-control" id="roomPrice" name="price_per_hour" min="0" step="0.01" placeholder="0.00" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
                                 <label for="roomStatus" class="form-label">Status</label>
                                 <select class="form-select" id="roomStatus" name="status" required>
                                     <option value="available">Available</option>
@@ -513,7 +558,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="roomDescription" class="form-label">Description</label>
-                            <textarea class="form-control" id="roomDescription"  name="description" rows="3"></textarea>
+                            <textarea class="form-control" id="roomDescription" name="description" rows="3" placeholder="Optional room description"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -524,7 +569,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Edit Room Modal -->
     <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -556,15 +601,22 @@
                         </div>
                         
                         <div class="row mb-3">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="editRoomCapacity" class="form-label">Capacity</label>
                                 <input type="number" class="form-control" id="editRoomCapacity" name="capacity" min="1" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label for="editBuilding" class="form-label">Building</label>
                                 <input type="text" class="form-control" id="editBuilding" name="building" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <label for="editRoomPrice" class="form-label">Price (RM/hour)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">RM</span>
+                                    <input type="number" class="form-control" id="editRoomPrice" name="price_per_hour" min="0" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
                                 <label for="editRoomStatus" class="form-label">Status</label>
                                 <select class="form-select" id="editRoomStatus" name="status" required>
                                     <option value="available">Available</option>
@@ -572,6 +624,7 @@
                                 </select>
                             </div>
                         </div>
+                        
                         <div class="mb-3">
                             <label for="editRoomDescription" class="form-label">Description</label>
                             <textarea class="form-control" id="editRoomDescription" name="description" rows="3"></textarea>

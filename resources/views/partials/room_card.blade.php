@@ -1,5 +1,10 @@
 <div class="col-md-6">
-    <div class="room-card" onclick="selectRoom(this, {{ $room->id }})">
+    <div class="room-card 
+        {{ $room->status == 'maintenance' ? 'disabled-room' : '' }}" 
+        @if($room->status != 'maintenance')
+            onclick="selectRoom(this, {{ $room->id }}, {{ $room->price_per_hour }})"
+        @endif
+    >
         <div class="d-flex align-items-center">
             <div class="room-type-icon 
                 @if($room->type == 'Lecture Hall') bg-primary
@@ -32,8 +37,36 @@
                 @endforeach
             @endif
         </div>
-        <div class="mt-2 text-end">
-            <span class="availability-badge bg-success text-white">Available</span>
+        <div class="d-flex justify-content-between align-items-center mt-2">
+            <div class="price-tag">
+                <i class="fas fa-money-bill-wave me-1"></i>
+                RM{{ number_format($room->price_per_hour, 2) }}/hour
+            </div>
+            <span class="availability-badge 
+                {{ $room->status == 'maintenance' ? 'bg-warning text-dark' : 'bg-success text-white' }}">
+                {{ ucfirst($room->status) }}
+            </span>
         </div>
     </div>
 </div>
+
+<style>
+    .price-tag {
+        background-color: #f8f9fa;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    /* Keep your existing styles and add this */
+    .room-card {
+        position: relative; /* For any future absolute positioning */
+    }
+    .disabled-room {
+    pointer-events: none;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+</style>

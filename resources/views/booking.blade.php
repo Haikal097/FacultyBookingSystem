@@ -1,6 +1,6 @@
 @extends('app')
 
-@section('title', 'Home - Facility Booking System')
+@section('title', 'Booking - Facility Booking System')
 
 @section('content')
     @if (Route::has('login'))
@@ -138,6 +138,7 @@
         }
     </style>
 </head>
+
 <body class="bg-light text-dark">
     <!-- Main Content -->
     <main class="container py-4">
@@ -147,7 +148,6 @@
                     <div class="booking-header">
                         <h2 class="mb-0"><i class="fas fa-calendar-plus me-2"></i> Book a Facility</h2>
                     </div>
-                    
                     <form action="{{ route('bookings.store') }}" method="POST" class="form-section">
                         @csrf
                         <!-- Step Indicator (Updated Version) -->
@@ -259,11 +259,48 @@
                                     currentStep = 3;
                                     updateStepIndicator();
                                 }
+
+                                
+                                const startTimeInput = document.getElementById('start_time');
+                                const endTimeInput = document.getElementById('end_time');
+                                const priceDisplay = document.getElementById('pricePlaceholder');
+
+                                // Validate inputs
+                                if (!startTimeInput.value || !endTimeInput.value || window.bookingData.pricePerHour <= 0) {
+                                    priceDisplay.textContent = '0.00';
+                                    return;
+                                }
+
+                                // Parse times
+                                const [startHours, startMins] = startTimeInput.value.split(':').map(Number);
+                                const [endHours, endMins] = endTimeInput.value.split(':').map(Number);
+
+                                // Calculate duration in hours
+                                let durationHours = (endHours + endMins / 60) - (startHours + startMins / 60);
+
+                                // Handle overnight bookings (if allowed)
+                                if (durationHours < 0) {
+                                    durationHours += 24; // Add 24 hours if end time is next day
+                                }
+
+                                // Always round up to the next full hour
+                                const roundedHours = Math.ceil(durationHours);
+
+                                // Calculate and display price
+                                if (roundedHours > 0) {
+                                    const totalPrice = roundedHours * window.bookingData.pricePerHour;
+                                    priceDisplay.textContent = totalPrice.toFixed(2);
+                                } else {
+                                    priceDisplay.textContent = '0.00';
+                                }
+                                
+                                calculateTotalPrice();
                             }
                             
                             // Make selectTimeSlot available globally
                             window.selectTimeSlot = selectTimeSlot;
                         });
+
                         </script>
 
                         <!-- Room Selection -->
@@ -296,7 +333,7 @@
                             {{-- All Rooms --}}
                             <div class="tab-pane fade show active" id="all" role="tabpanel">
                                 <div class="row">
-                                    @foreach ($rooms as $room)
+                                    @foreach ($rooms->sortByDesc(function($room) { return $room->status == 'available' ? 1 : 0; }) as $room)
                                         @include('partials.room_card', ['room' => $room])
                                     @endforeach
                                 </div>
@@ -305,7 +342,7 @@
                             {{-- Lecture Halls --}}
                             <div class="tab-pane fade" id="lecture" role="tabpanel">
                                 <div class="row">
-                                    @foreach ($rooms->where('type', 'Lecture Hall') as $room)
+                                    @foreach ($rooms->where('type', 'Lecture Hall')->sortByDesc(function($room) { return $room->status == 'available' ? 1 : 0; }) as $room)
                                         @include('partials.room_card', ['room' => $room])
                                     @endforeach
                                 </div>
@@ -314,7 +351,7 @@
                             {{-- Meeting Rooms --}}
                             <div class="tab-pane fade" id="meeting" role="tabpanel">
                                 <div class="row">
-                                    @foreach ($rooms->where('type', 'Meeting Room') as $room)
+                                    @foreach ($rooms->where('type', 'Meeting Room')->sortByDesc(function($room) { return $room->status == 'available' ? 1 : 0; }) as $room)
                                         @include('partials.room_card', ['room' => $room])
                                     @endforeach
                                 </div>
@@ -323,7 +360,7 @@
                             {{-- Computer Labs --}}
                             <div class="tab-pane fade" id="lab" role="tabpanel">
                                 <div class="row">
-                                    @foreach ($rooms->where('type', 'Computer Lab') as $room)
+                                    @foreach ($rooms->where('type', 'Computer Lab')->sortByDesc(function($room) { return $room->status == 'available' ? 1 : 0; }) as $room)
                                         @include('partials.room_card', ['room' => $room])
                                     @endforeach
                                 </div>
@@ -332,7 +369,7 @@
                             {{-- Sports Facilities --}}
                             <div class="tab-pane fade" id="sports" role="tabpanel">
                                 <div class="row">
-                                    @foreach ($rooms->where('type', 'Sports Facility') as $room)
+                                    @foreach ($rooms->where('type', 'Sports Facility')->sortByDesc(function($room) { return $room->status == 'available' ? 1 : 0; }) as $room)
                                         @include('partials.room_card', ['room' => $room])
                                     @endforeach
                                 </div>
@@ -341,7 +378,11 @@
                             {{-- Other --}}
                             <div class="tab-pane fade" id="other" role="tabpanel">
                                 <div class="row">
-                                    @foreach ($rooms->whereNotIn('type', ['Lecture Hall', 'Meeting Room', 'Computer Lab', 'Sports Facility']) as $room)
+                                    @foreach (
+                                        $rooms->whereNotIn('type', ['Lecture Hall', 'Meeting Room', 'Computer Lab', 'Sports Facility'])
+                                            ->sortByDesc(function($room) { return $room->status == 'available' ? 1 : 0; }) 
+                                        as $room
+                                    )
                                         @include('partials.room_card', ['room' => $room])
                                     @endforeach
                                 </div>
@@ -503,7 +544,7 @@
                             
                             <h6 class="mt-3 mb-2">Morning</h6>
                             <div class="d-flex flex-wrap">
-                                <span class="time-slot" onclick="selectTimeSlot(this, '08:00', '10:00')">8:00 AM - 10:00 AM</span>
+                                <span class="time-slot" onclick="selectTimeSlot(this, '08:00', '10:00');" >8:00 AM - 10:00 AM</span>
                                 <span class="time-slot" onclick="selectTimeSlot(this, '10:00', '12:00')">10:00 AM - 12:00 PM</span>
                             </div>
                             
@@ -547,8 +588,13 @@
                             </div>
                         </div>
 
-                        <!-- Submit -->
-                        <div class="text-end mt-4">
+                        <!-- Submit and Price -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <input type="text" name="total_price" id="total_price" value="0.00">
+                            <div class="price-info">
+                                <strong>Total Price:</strong> RM <span id="pricePlaceholder">0.00</span>
+                            </div>
+
                             <button type="submit" class="btn btn-book btn-lg">
                                 <i class="fas fa-check-circle me-2"></i> Confirm Booking
                             </button>
@@ -563,23 +609,105 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Room selection
-        function selectRoom(element, roomId) {
+        // Global variable to store pricing info
+        window.bookingData = {
+            pricePerHour: 0,
+            selectedRoomId: null
+        };
+
+        // Room selection handler
+        function selectRoom(element, roomId, pricePerHour) {
             document.querySelectorAll('.room-card').forEach(card => {
                 card.classList.remove('selected');
             });
             element.classList.add('selected');
-            document.getElementById('selected_room_id').value = roomId; 
+            
+            // Update global booking data
+            window.bookingData.pricePerHour = parseFloat(pricePerHour);
+            window.bookingData.selectedRoomId = roomId;
+            
+            // Update hidden field
+            document.getElementById('selected_room_id').value = roomId;
+            
+            // Recalculate price
+            calculateTotalPrice();
         }
-        
-        // Time slot selection
-        function selectTimeSlot(element, startTime, endTime) {
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.classList.remove('selected');
+
+        // Price calculation function
+        function calculateTotalPrice() {
+            const startTimeInput = document.getElementById('start_time');
+            const endTimeInput = document.getElementById('end_time');
+            const priceDisplay = document.getElementById('pricePlaceholder');
+            const priceHiddenInput = document.getElementById('total_price'); // Add this
+
+            // Validate inputs
+            if (!startTimeInput.value || !endTimeInput.value || window.bookingData.pricePerHour <= 0) {
+                priceDisplay.textContent = '0.00';
+                priceHiddenInput.value = '0.00'; // Reset the hidden input
+                return;
+            }
+
+            // Parse times
+            const [startHours, startMins] = startTimeInput.value.split(':').map(Number);
+            const [endHours, endMins] = endTimeInput.value.split(':').map(Number);
+
+            // Calculate duration in hours
+            let durationHours = (endHours + endMins / 60) - (startHours + startMins / 60);
+
+            // Handle overnight bookings (if allowed)
+            if (durationHours < 0) {
+                durationHours += 24; // Add 24 hours if end time is next day
+            }
+
+            // Always round up to the next full hour
+            const roundedHours = Math.ceil(durationHours);
+
+            // Calculate and display price
+            if (roundedHours > 0) {
+                const totalPrice = roundedHours * window.bookingData.pricePerHour;
+                priceDisplay.textContent = totalPrice.toFixed(2);
+                priceHiddenInput.value = totalPrice.toFixed(2); // Update the hidden input here
+             alert(`Total Price: RM ${totalPrice.toFixed(2)}`);
+            } else {
+                priceDisplay.textContent = '0.00';
+                priceHiddenInput.value = '0.00';
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize date picker
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('booking_date').value = today;
+            document.getElementById('booking_date').min = today;
+            
+            // Set up time change listeners
+            document.getElementById('start_time').addEventListener('change', function() {
+                calculateTotalPrice();
+                validateTimeRange();
             });
-            element.classList.add('selected');
-            document.getElementById('start_time').value = startTime;
-            document.getElementById('end_time').value = endTime;
+            
+            document.getElementById('end_time').addEventListener('change', function() {
+                calculateTotalPrice();
+                validateTimeRange();
+            });
+        });
+
+        // Additional validation function
+        function validateTimeRange() {
+            const start = document.getElementById('start_time').value;
+            const end = document.getElementById('end_time').value;
+            
+            if (start && end) {
+                const startTime = new Date(`2000-01-01T${start}`);
+                const endTime = new Date(`2000-01-01T${end}`);
+                
+                if (endTime <= startTime) {
+                    alert('End time must be after start time');
+                    document.getElementById('end_time').value = '';
+                    calculateTotalPrice();
+                }
+            }
         }
         
         // Set default date to today
@@ -589,6 +717,12 @@
             document.getElementById('booking_date').min = today;
         });
     </script>
+    @if ($errors->has('time_slot'))
+        <script>
+            alert("{{ $errors->first('time_slot') }}");
+        </script>
+    @endif
+
 </body>
 </html>
 @endsection
