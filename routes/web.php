@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/manageusers', [UserController::class, 'index'])->name('admin.manageuser');
     Route::get('/managerooms', [RoomController::class, 'index'])->name('rooms.index');
     Route::get('/managebookings', [BookingController::class, 'index'])->name('admin.managebooking');
+    Route::get('/admin/manage-bookings', [BookingController::class, 'manageBookings'])->name('admin.manage.bookings');
     Route::post('/managebookings/{id}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
     Route::post('/managebookings/{id}/reject', [BookingController::class, 'reject'])->name('bookings.reject');
     Route::get('/adminsettings', function () {

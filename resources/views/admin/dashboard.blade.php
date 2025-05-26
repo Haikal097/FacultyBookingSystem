@@ -198,12 +198,6 @@
     <div class="content">
         <div class="header">
             <h2>Welcome Back, Admin</h2>
-            <div class="d-flex align-items-center">
-                <span class="me-3">Last login: Today, 10:30 AM</span>
-                <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                    <i class="fas fa-user text-white"></i>
-                </div>
-            </div>
         </div>
         
         <div class="welcome-message">
@@ -253,56 +247,154 @@
             </div>
         </div>
         
-        <!-- Recent Activity Section -->
-        <div class="card mt-4">
-            <div class="card-body">
-                <h5 class="card-title mb-4">Recent Activity</h5>
-                <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action border-0 mb-2 rounded">
-                        <div class="d-flex w-100 justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
-                                    <i class="fas fa-user-plus text-primary"></i>
+        <div class="card mt-4 border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="card-header bg-white border-bottom py-3 px-4">
+                    <h5 class="card-title mb-0 fw-semibold d-flex align-items-center">
+                        <i class="fas fa-clock text-warning me-2"></i>
+                        Recent Pending Bookings
+                    </h5>
+                </div>
+                
+                <div class="list-group list-group-flush">
+                    @forelse($pendingBookings as $booking)
+                    <div class="list-group-item border-0 py-3 px-4 hover-bg-light">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <!-- Left Content -->
+                            <div class="d-flex align-items-start flex-grow-1">
+                                <div class="bg-warning bg-opacity-10 p-2 rounded-2 me-3 text-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-clock text-warning"></i>
                                 </div>
-                                <div>
-                                    <h6 class="mb-1">New user registered</h6>
-                                    <p class="mb-0 small text-muted">John Doe signed up 30 minutes ago</p>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex flex-wrap align-items-center mb-1">
+                                        <h6 class="mb-0 me-2 fw-semibold">{{ $booking->purpose_type }}</h6>
+                                        <span class="badge bg-warning bg-opacity-15 text-white fs-11 fw-normal me-3">
+                                            Pending
+                                        </span>
+
+                                        <span class="small text-muted d-flex align-items-center">
+                                            <i class="fas fa-money-bill-wave me-1 text-success"></i> 
+                                            <span class="fw-semibold text-dark">Total Price:</span>&nbsp;RM{{ number_format($booking->total_price, 2) }}
+                                        </span>
+                                    </div>
+
+                                    <p class="small text-muted mb-1">
+                                        <i class="fas fa-door-open me-1"></i> {{ $booking->room->name }}
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-calendar-day me-1"></i> {{ Carbon\Carbon::parse($booking->booking_date)->format('D, M j') }}
+                                        <span class="mx-2">•</span>
+                                        <i class="fas fa-clock me-1"></i> {{ Carbon\Carbon::parse($booking->start_time)->format('g:i A') }}-{{ Carbon\Carbon::parse($booking->end_time)->format('g:i A') }}
+                                    </p>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-xs me-2">
+                                            <div class="avatar-title bg-light rounded-circle text-primary">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">Requested by {{ $booking->user->name }}</small>
+                                    </div>
                                 </div>
                             </div>
-                            <small class="text-muted">Just now</small>
-                        </div>
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action border-0 mb-2 rounded">
-                        <div class="d-flex w-100 justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-success bg-opacity-10 p-2 rounded me-3">
-                                    <i class="fas fa-calendar-check text-success"></i>
-                                </div>
-                                <div>
-                                    <h6 class="mb-1">New booking</h6>
-                                    <p class="mb-0 small text-muted">Dewan Kuliah 200 booked for tomorrow</p>
-                                </div>
-                            </div>
-                            <small class="text-muted">2 hours ago</small>
-                        </div>
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action border-0 rounded">
-                        <div class="d-flex w-100 justify-content-between">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-warning bg-opacity-10 p-2 rounded me-3">
-                                    <i class="fas fa-exclamation-triangle text-warning"></i>
-                                </div>
-                                <div>
-                                    <h6 class="mb-1">Maintenance scheduled</h6>
-                                    <p class="mb-0 small text-muted">Bilik Mesyuarat 3 under maintenance</p>
+                            
+                            <!-- Right Content -->
+                            <div class="d-flex flex-column align-items-end">
+                                <small class="text-muted mb-2">{{ $booking->created_at->diffForHumans() }}</small>
+                                <div class="btn-group btn-group-sm gap-2">
+                                    <form action="{{ route('bookings.approve', $booking->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-success px-3" title="Approve" data-bs-toggle="tooltip">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('bookings.reject', $booking->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-danger px-3" title="Reject" data-bs-toggle="tooltip">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
-                            <small class="text-muted">5 hours ago</small>
                         </div>
+                    </div>
+                    @empty
+                    <div class="list-group-item border-0 py-4 text-center">
+                        <div class="d-flex flex-column align-items-center justify-content-center">
+                            <div class="avatar-lg mb-3">
+                                <div class="avatar-title bg-light rounded-circle text-muted">
+                                    <i class="fas fa-calendar-times fs-24"></i>
+                                </div>
+                            </div>
+                            <h5 class="text-muted mb-1">No Pending Bookings</h5>
+                            <p class="text-muted mb-0">All bookings are processed</p>
+                        </div>
+                    </div>
+                    @endforelse
+                </div>
+                
+                @if($pendingBookings->count() > 0)
+                <div class="card-footer bg-white border-top py-3 px-4">
+                    <a href="{{ route('admin.managebooking', ['filter' => 'pending']) }}" class="btn btn-link text-decoration-none px-0">
+                        View All Pending Bookings <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
+                @endif
             </div>
         </div>
+
+        <style>
+            .hover-bg-light:hover {
+                background-color: #f8f9fa;
+                transition: background-color 0.2s ease;
+            }
+            .fs-11 {
+                font-size: 11px;
+            }
+            .fs-24 {
+                font-size: 24px;
+            }
+            .avatar-xs {
+                width: 24px;
+                height: 24px;
+            }
+            .avatar-lg {
+                width: 72px;
+                height: 72px;
+            }
+            .avatar-title {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+
+        <script>
+            // Initialize tooltips
+            document.addEventListener('DOMContentLoaded', function() {
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+                
+                // Add confirmation dialogs
+                document.querySelectorAll('form[action*="approve"]').forEach(form => {
+                    form.addEventListener('submit', function(e) {
+                        if (!confirm('Are you sure you want to approve this booking?')) {
+                            e.preventDefault();
+                        }
+                    });
+                });
+                
+                document.querySelectorAll('form[action*="reject"]').forEach(form => {
+                    form.addEventListener('submit', function(e) {
+                        if (!confirm('Are you sure you want to reject this booking?')) {
+                            e.preventDefault();
+                        }
+                    });
+                });
+            });
+        </script>
     </div>
 
     <!-- Bootstrap JS Bundle with Popper -->
