@@ -76,6 +76,7 @@
                                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                                             <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Approved</option>
                                             <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                                         </select>
                                     </div>
                                     
@@ -160,6 +161,7 @@
                                         <button class="btn btn-sm btn-outline-primary view-booking" 
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#bookingDetailsModal"
+                                                data-id="{{ $booking->id }}"
                                                 data-purpose-type="{{ $booking->purpose_type }}"
                                                 data-purpose="{{ $booking->purpose }}"
                                                 data-facility="{{ $booking->room->name ?? 'N/A' }}"
@@ -170,7 +172,8 @@
                                                 data-status="{{ ucfirst($booking->status) }}"
                                                 data-status-class="{{ $statusClass }}"
                                                 data-approve-url="{{ route('bookings.approve', $booking->id) }}"
-                                                data-reject-url="{{ route('bookings.reject', $booking->id) }}">
+                                                data-reject-url="{{ route('bookings.reject', $booking->id) }}"
+                                                onclick="toggleCancelButton(this)">
                                             View
                                         </button>
                                     </td>
@@ -234,6 +237,48 @@
                                     </div>
                                 </div>
                                 <div class="modal-footer">
+                                    <button id="cancelBookingButton" class="btn btn-danger">Cancel Booking</button>
+                                    <script>
+                                        let currentBookingId = null;
+
+                                        function toggleCancelButton(button) {
+                                            var status = button.getAttribute('data-status').toLowerCase();
+                                            var cancelButton = document.getElementById('cancelBookingButton');
+                                            currentBookingId = button.getAttribute('data-id');  // Get current booking ID
+
+                                            if (cancelButton) {
+                                                cancelButton.style.display = (status === 'pending') ? 'inline-block' : 'none';
+                                            }
+                                        }
+
+                                        document.getElementById('cancelBookingButton').addEventListener('click', function () {
+                                            if (!currentBookingId) {
+                                                alert('No booking selected.');
+                                                return;
+                                            }
+
+                                            if (confirm('Are you sure you want to cancel this booking?')) {
+                                                fetch(`/bookings/${currentBookingId}/cancel`, {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                        'Accept': 'application/json'
+                                                    },
+                                                })
+                                                .then(response => response.json())
+                                                .then(data => {
+                                                    alert(data.message);
+                                                    // Optionally: Reload page or update UI
+                                                    location.reload();
+                                                })
+                                                .catch(error => {
+                                                    console.error('Error:', error);
+                                                    alert('An error occurred while cancelling the booking.');
+                                                });
+                                            }
+                                        });
+                                        
+                                    </script>
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                     @if(auth()->user()->role == 'admin')
                                     <div class="btn-group">

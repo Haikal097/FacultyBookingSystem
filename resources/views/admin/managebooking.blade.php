@@ -298,7 +298,8 @@
                             'this_month' => 'This Month',
                             'pending' => 'Pending Approval',
                             'approved' => 'Approved',
-                            'rejected' => 'Rejected'
+                            'rejected' => 'Rejected',
+                            'cancelled' => 'Cancelled'
                         ] as $value => $label)
                             <li>
                                 <a class="dropdown-item @if(request('filter') == $value) active-filter @endif" 
