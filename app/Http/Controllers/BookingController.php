@@ -45,6 +45,7 @@ class BookingController extends Controller
         // Check for conflicting bookings
         $conflict = Booking::where('room_id', $validated['room_id'])
             ->where('booking_date', $validated['booking_date'])
+            ->where('status', 'approved')
             ->where(function($query) use ($validated) {
                 $query->whereBetween('start_time', [$validated['start_time'], $validated['end_time']])
                       ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
@@ -114,6 +115,7 @@ class BookingController extends Controller
                 case 'pending':
                 case 'approved':
                 case 'rejected':
+                case 'cancelled':
                     $query->where('status', $filter);
                     break;
             }
@@ -181,5 +183,14 @@ class BookingController extends Controller
         $booking->save();
 
         return redirect()->back()->with('success', 'Booking rejected.');
+    }
+
+    public function cancel($id)
+    {
+        $booking = Booking::findOrFail($id);
+        $booking->status = 'cancelled';
+        $booking->save();
+
+        return response()->json(['message' => 'Booking cancelled successfully.']);
     }
 }
