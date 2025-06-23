@@ -16,6 +16,7 @@ class RoomController extends Controller
             'building' => 'required|string|max:255',
             'status' => 'required|in:available,maintenance,occupied',
             'price_per_hour' => 'required|numeric|min:0',
+            'price_fullday' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 
@@ -73,6 +74,7 @@ class RoomController extends Controller
             'building'    => 'required|string|max:255',
             'status'      => 'required|in:available,maintenance',
             'price_per_hour' => 'required|numeric|min:0',
+            'price_fullday' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 

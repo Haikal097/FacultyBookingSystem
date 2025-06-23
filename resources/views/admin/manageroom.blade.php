@@ -345,7 +345,7 @@
                             <th>Type</th>
                             <th>Capacity</th>
                             <th>Building</th>
-                            <th>Price</th>
+                            <th style="width: 150px;">Price</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -401,7 +401,8 @@
                             </td>
                             <td>{{ $room->building }}</td>
                             <td>
-                                RM {{ number_format($room->price_per_hour, 2) }}
+                                RM {{ number_format($room->price_per_hour, 2) }}<br>
+                                <small class="text-muted">RM {{ number_format($room->price_fullday, 2) }}<small>/day</small></small>
                             </td>
                             <td>
                                 <span class="room-status">
@@ -420,6 +421,7 @@
                                     data-status="{{ $room->status }}"
                                     data-price="{{ $room->price_per_hour }}"
                                     data-description="{{ $room->description }}"
+                                    data-price-fullday="{{ $room->price_fullday }}"
                                     onclick="editRoom(this)">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -475,6 +477,7 @@
                             const status = button.getAttribute('data-status');
                             const description = button.getAttribute('data-description');
                             const price = button.getAttribute('data-price');
+                            const priceFullday = button.getAttribute('data-price-fullday');
                             
                             // Set the form action URL with the room ID
                             document.getElementById('editRoomForm').action = `/rooms/${roomId}`;
@@ -487,6 +490,7 @@
                             document.getElementById('editRoomStatus').value = status;
                             document.getElementById('editRoomDescription').value = description;
                             document.getElementById('editRoomPrice').value = price;
+                            document.getElementById('editRoomPriceFullDay').value = priceFullday;
                         }
                     </script>
                 </table>
@@ -505,134 +509,272 @@
 
     <!-- Add Room Modal -->
     <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="addRoomModalLabel">Add New Room</h5>
+                    <h5 class="modal-title fs-5" id="addRoomModalLabel">
+                        <i class="fas fa-plus-circle me-2"></i>Add New Room
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="{{ route('rooms.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="roomName" class="form-label">Room Name</label>
-                                <input type="text" class="form-control" id="roomName" name="name" placeholder="e.g. Dewan Kuliah 100" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="roomType" class="form-label">Room Type</label>
-                                <select class="form-select" id="roomType" name="type" required>
-                                    <option value="">Select type</option>
-                                    <option>Lecture Hall</option>
-                                    <option>Meeting Room</option>
-                                    <option>Computer Lab</option>
-                                    <option>Sports Facility</option>
-                                    <option>Other</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-3">
-                                <label for="roomCapacity" class="form-label">Capacity</label>
-                                <input type="number" class="form-control" id="roomCapacity" name="capacity" min="1" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="building" class="form-label">Building</label>
-                                <input type="text" class="form-control" id="building" name="building" placeholder="e.g. Block A" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="roomPrice" class="form-label">Price (RM/hour)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">RM</span>
-                                    <input type="number" class="form-control" id="roomPrice" name="price_per_hour" min="0" step="0.01" placeholder="0.00" required>
+                        <!-- Room Basic Info Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Basic Information
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="roomName" class="form-label">Room Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="roomName" name="name" 
+                                        placeholder="e.g. Dewan Kuliah 100" required>
+                                    <small class="text-muted">Enter the official room name</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="roomType" class="form-label">Room Type <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="roomType" name="type" required>
+                                        <option value="" disabled selected>Select room type</option>
+                                        <option value="Lecture Hall">Lecture Hall</option>
+                                        <option value="Meeting Room">Meeting Room</option>
+                                        <option value="Computer Lab">Computer Lab</option>
+                                        <option value="Sports Facility">Sports Facility</option>
+                                        <option value="Other">Other</option>
+                                    </select>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <label for="roomStatus" class="form-label">Status</label>
-                                <select class="form-select" id="roomStatus" name="status" required>
-                                    <option value="available">Available</option>
-                                    <option value="maintenance">Under Maintenance</option>
-                                </select>
+                        </div>
+
+                        <!-- Room Specifications Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="fas fa-cog me-2"></i>Specifications
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label for="roomCapacity" class="form-label">Capacity <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="roomCapacity" 
+                                            name="capacity" min="1" required>
+                                        <span class="input-group-text">people</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="building" class="form-label">Building <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="building" name="building" 
+                                        placeholder="e.g. Block A" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="roomStatus" class="form-label">Status <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="roomStatus" name="status" required>
+                                        <option value="available">Available</option>
+                                        <option value="maintenance">Under Maintenance</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- Pricing Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="fas fa-tag me-2"></i>Pricing
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="roomPrice" class="form-label">Hourly Rate <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">RM</span>
+                                        <input type="number" class="form-control" id="roomPrice" 
+                                            name="price_per_hour" min="0" step="0.01" placeholder="0.00" required>
+                                    </div>
+                                    <small class="text-muted">Price per hour</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="roomPriceFullDay" class="form-label">Full Day Rate</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">RM</span>
+                                        <input type="number" class="form-control" id="roomPriceFullDay" 
+                                            name="price_fullday" min="0" step="0.01" placeholder="0.00">
+                                    </div>
+                                    <small class="text-muted">Optional full day price</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description Section -->
                         <div class="mb-3">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="fas fa-align-left me-2"></i>Additional Information
+                            </h6>
                             <label for="roomDescription" class="form-label">Description</label>
-                            <textarea class="form-control" id="roomDescription" name="description" rows="3" placeholder="Optional room description"></textarea>
+                            <textarea class="form-control" id="roomDescription" name="description" 
+                                    rows="3" placeholder="Enter room features, equipment, or special notes"></textarea>
+                            <small class="text-muted">Maximum 500 characters</small>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Room</button>
+                    <div class="modal-footer border-top-0 bg-light">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Save Room
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    
+
+    <style>
+        /* Custom Modal Styling */
+        #addRoomModal .modal-content {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        #addRoomModal .modal-header {
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding: 1rem 1.5rem;
+        }
+        
+        #addRoomModal .modal-body {
+            padding: 1.5rem;
+        }
+        
+        #addRoomModal .modal-footer {
+            padding: 1rem 1.5rem;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        #addRoomModal .form-label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        #addRoomModal .input-group-text {
+            min-width: 45px;
+            justify-content: center;
+        }
+        
+        #addRoomModal .section-title {
+            border-bottom: 1px dashed #dee2e6;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+
     <!-- Edit Room Modal -->
     <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="editRoomModalLabel">Edit Room</h5>
+                    <h5 class="modal-title fs-5" id="editRoomModalLabel">
+                        <i class="fas fa-edit me-2"></i>Edit Room
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="editRoomForm" method="POST">
                     @csrf
                     @method('PUT')
                     <div class="modal-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="editRoomName" class="form-label">Room Name</label>
-                                <input type="text" class="form-control" id="editRoomName" name="name" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="editRoomType" class="form-label">Room Type</label>
-                                <select class="form-select" id="editRoomType" name="type" required>
-                                    <option value="">Select type</option>
-                                    <option>Lecture Hall</option>
-                                    <option>Meeting Room</option>
-                                    <option>Computer Lab</option>
-                                    <option>Sports Facility</option>
-                                    <option>Other</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-3">
-                                <label for="editRoomCapacity" class="form-label">Capacity</label>
-                                <input type="number" class="form-control" id="editRoomCapacity" name="capacity" min="1" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="editBuilding" class="form-label">Building</label>
-                                <input type="text" class="form-control" id="editBuilding" name="building" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="editRoomPrice" class="form-label">Price (RM/hour)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">RM</span>
-                                    <input type="number" class="form-control" id="editRoomPrice" name="price_per_hour" min="0" step="0.01" required>
+                        <!-- Room Basic Info Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Basic Information
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="editRoomName" class="form-label">Room Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="editRoomName" name="name" required>
+                                    <small class="text-muted">Official room name</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="editRoomType" class="form-label">Room Type <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="editRoomType" name="type" required>
+                                        <option value="" disabled>Select type</option>
+                                        <option value="Lecture Hall">Lecture Hall</option>
+                                        <option value="Meeting Room">Meeting Room</option>
+                                        <option value="Computer Lab">Computer Lab</option>
+                                        <option value="Sports Facility">Sports Facility</option>
+                                        <option value="Other">Other</option>
+                                    </select>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <label for="editRoomStatus" class="form-label">Status</label>
-                                <select class="form-select" id="editRoomStatus" name="status" required>
-                                    <option value="available">Available</option>
-                                    <option value="maintenance">Under Maintenance</option>
-                                </select>
+                        </div>
+
+                        <!-- Room Specifications Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="fas fa-cog me-2"></i>Specifications
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label for="editRoomCapacity" class="form-label">Capacity <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="editRoomCapacity" 
+                                            name="capacity" min="1" required>
+                                        <span class="input-group-text">people</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="editBuilding" class="form-label">Building <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="editBuilding" name="building" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="editRoomStatus" class="form-label">Status <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="editRoomStatus" name="status" required>
+                                        <option value="available">Available</option>
+                                        <option value="maintenance">Under Maintenance</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                        
+
+                        <!-- Pricing Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="fas fa-tag me-2"></i>Pricing
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="editRoomPrice" class="form-label">Hourly Rate <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">RM</span>
+                                        <input type="number" class="form-control" id="editRoomPrice" name="price_per_hour" min="0" step="0.01" required>
+                                    </div>
+                                    <small class="text-muted">Price per hour</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="editRoomPriceFullDay" class="form-label">Full Day Rate</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light">RM</span>
+                                        <input type="number" class="form-control" id="editRoomPriceFullDay" 
+                                            name="price_fullday" min="0" step="0.01">
+                                    </div>
+                                    <small class="text-muted">Optional full day price</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description Section -->
                         <div class="mb-3">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="fas fa-align-left me-2"></i>Additional Information
+                            </h6>
                             <label for="editRoomDescription" class="form-label">Description</label>
                             <textarea class="form-control" id="editRoomDescription" name="description" rows="3"></textarea>
+                            <small class="text-muted">Maximum 500 characters</small>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <div class="modal-footer border-top-0 bg-light">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
                     </div>
                 </form>
             </div>
