@@ -17,6 +17,7 @@ class Room extends Model
         'status',
         'description',
         'price_per_hour',
+        'price_fullday'
     ];
 
     public function bookings()

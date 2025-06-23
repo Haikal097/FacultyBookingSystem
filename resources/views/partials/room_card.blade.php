@@ -2,7 +2,7 @@
     <div class="room-card 
         {{ $room->status == 'maintenance' ? 'disabled-room' : '' }}" 
         @if($room->status != 'maintenance')
-            onclick="selectRoom(this, {{ $room->id }}, {{ $room->price_per_hour }})"
+            onclick="selectRoom(this, {{ $room->id }}, {{ $room->price_per_hour }}, {{ $room->price_fullday }})"
         @endif
     >
         <div class="d-flex align-items-center">
@@ -39,8 +39,16 @@
         </div>
         <div class="d-flex justify-content-between align-items-center mt-2">
             <div class="price-tag">
-                <i class="fas fa-money-bill-wave me-1"></i>
-                RM{{ number_format($room->price_per_hour, 2) }}/hour
+                <div class="d-flex">
+                    <div class="pe-2 border-end">
+                        <small class="text-muted d-block">Per Hour</small>
+                        <strong>RM{{ number_format($room->price_per_hour, 2) }}</strong>
+                    </div>
+                    <div class="ps-2">
+                        <small class="text-muted d-block">Full Day</small>
+                        <strong>RM{{ number_format($room->price_fullday, 2) }}</strong>
+                    </div>
+                </div>
             </div>
             <span class="availability-badge 
                 {{ $room->status == 'maintenance' ? 'bg-warning text-dark' : 'bg-success text-white' }}">

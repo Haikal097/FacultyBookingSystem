@@ -113,6 +113,11 @@
             color: white;
             border-color: var(--primary-color);
         }
+
+        /* Hover state when already selected */
+        .time-slot.selected:hover {
+            color: grey;
+        }
         
         .btn-book {
             background: linear-gradient(135deg, var(--success-color), #6bc76b);
@@ -296,9 +301,60 @@
                                 
                                 calculateTotalPrice();
                             }
+
+                            function toggleEntireDay(checkbox) {
+                                const timeSlots = document.querySelectorAll('.time-slot');
+                                const startTimeInput = document.getElementById('start_time');
+                                const endTimeInput = document.getElementById('end_time');
+                                const priceDisplay = document.getElementById('pricePlaceholder');
+                                
+                                if (checkbox.checked) {
+                                    // Set entire day times
+                                    startTimeInput.value = '08:00';
+                                    endTimeInput.value = '22:00';
+                                    
+                                    // Disable all time slots and remove selection
+                                    timeSlots.forEach(slot => {
+                                        slot.classList.add('disabled');
+                                        slot.classList.remove('selected');
+                                    });
+                                    
+                                    // Disable manual time inputs
+                                    startTimeInput.readOnly = true;
+                                    endTimeInput.readOnly = true;
+                                    
+                                    // Calculate price for entire day
+                                    const totalPrice = window.bookingData.priceFullDay;
+                                    priceDisplay.textContent = totalPrice.toFixed(2);
+                                    
+                                    // Mark step 2 as complete
+                                    if (!completedSteps.includes(2)) {
+                                        completedSteps.push(2);
+                                        currentStep = 3;
+                                        updateStepIndicator();
+                                    }
+                                    
+                                    calculateTotalPrice();
+                                } else {
+                                    // Enable all time slots
+                                    timeSlots.forEach(slot => {
+                                        slot.classList.remove('disabled');
+                                    });
+                                    
+                                    // Enable manual time inputs
+                                    startTimeInput.readOnly = false;
+                                    endTimeInput.readOnly = false;
+
+                                    priceDisplay.textContent = (0).toFixed(2); 
+                                    startTimeInput.value = '';
+                                    endTimeInput.value = '';
+                                    
+                                }
+                            }
                             
                             // Make selectTimeSlot available globally
                             window.selectTimeSlot = selectTimeSlot;
+                            window.toggleEntireDay = toggleEntireDay;
                         });
 
                         </script>
@@ -537,40 +593,88 @@
                             }
                         </style>
 
-
                         <!-- Time Selection -->
                         <div class="mb-4">
                             <h5 class="form-section-title"><i class="fas fa-clock me-2"></i>Select Time Slot</h5>
                             
-                            <h6 class="mt-3 mb-2">Morning</h6>
-                            <div class="d-flex flex-wrap">
-                                <span class="time-slot" onclick="selectTimeSlot(this, '08:00', '10:00');" >8:00 AM - 10:00 AM</span>
-                                <span class="time-slot" onclick="selectTimeSlot(this, '10:00', '12:00')">10:00 AM - 12:00 PM</span>
+                            <!-- Entire Day Toggle -->
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="entireDayToggle" onchange="toggleEntireDay(this)">
+                                <label class="form-check-label" for="entireDayToggle">
+                                    <i class="fas fa-calendar-day me-1"></i> Entire Day (8:00 AM - 10:00 PM)
+                                </label>
                             </div>
                             
-                            <h6 class="mt-3 mb-2">Afternoon</h6>
-                            <div class="d-flex flex-wrap">
-                                <span class="time-slot" onclick="selectTimeSlot(this, '14:00', '16:00')">2:00 PM - 4:00 PM</span>
-                                <span class="time-slot" onclick="selectTimeSlot(this, '16:00', '18:00')">4:00 PM - 6:00 PM</span>
+                            <!-- Time Slot Groups -->
+                            <div class="time-slot-groups">
+                                <h6 class="mt-3 mb-2">Morning</h6>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <span class="time-slot" onclick="selectTimeSlot(this, '08:00', '10:00')">8:00 AM - 10:00 AM</span>
+                                    <span class="time-slot" onclick="selectTimeSlot(this, '10:00', '12:00')">10:00 AM - 12:00 PM</span>
+                                </div>
+                                
+                                <h6 class="mt-3 mb-2">Afternoon</h6>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <span class="time-slot" onclick="selectTimeSlot(this, '14:00', '16:00')">2:00 PM - 4:00 PM</span>
+                                    <span class="time-slot" onclick="selectTimeSlot(this, '16:00', '18:00')">4:00 PM - 6:00 PM</span>
+                                </div>
+                                
+                                <h6 class="mt-3 mb-2">Evening</h6>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <span class="time-slot" onclick="selectTimeSlot(this, '18:00', '20:00')">6:00 PM - 8:00 PM</span>
+                                    <span class="time-slot" onclick="selectTimeSlot(this, '20:00', '22:00')">8:00 PM - 10:00 PM</span>
+                                </div>
                             </div>
                             
-                            <h6 class="mt-3 mb-2">Evening</h6>
-                            <div class="d-flex flex-wrap">
-                                <span class="time-slot" onclick="selectTimeSlot(this, '18:00', '20:00')">6:00 PM - 8:00 PM</span>
-                                <span class="time-slot" onclick="selectTimeSlot(this, '20:00', '22:00')">8:00 PM - 10:00 PM</span>
-                            </div>
-                            
+                            <!-- Custom Time Inputs -->
                             <div class="row mt-3">
                                 <div class="col-md-6">
                                     <label for="start_time" class="form-label">Custom Start Time</label>
-                                    <input type="time" name="start_time" id="start_time" class="form-control" required>
+                                    <input type="time" class="form-control" id="start_time" name="start_time" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="end_time" class="form-label">Custom End Time</label>
-                                    <input type="time" name="end_time" id="end_time" class="form-control" required>
+                                    <input type="time" class="form-control" id="end_time" name="end_time" required>
                                 </div>
                             </div>
                         </div>
+
+                        <style>
+                            .time-slot {
+                                padding: 8px 16px;
+                                border: 1px solid #dee2e6;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                            }
+                            
+                            .time-slot:hover:not(.disabled) {
+                                background-color: #f8f9fa;
+                                border-color: #adb5bd;
+                            }
+                            
+                            .time-slot.selected {
+                                background-color: #0d6efd;
+                                color: white;
+                                border-color: #0d6efd;
+                            }
+                            
+                            .time-slot.disabled {
+                                opacity: 0.5;
+                                cursor: not-allowed;
+                                pointer-events: none;
+                            }
+                            
+                            .form-section-title {
+                                color: #333;
+                                font-weight: 600;
+                            }
+                            
+                            .form-check-label {
+                                font-weight: 500;
+                                cursor: pointer;
+                            }
+                        </style>
 
                         <!-- Purpose -->
                         <div class="mb-4">
@@ -612,11 +716,12 @@
         // Global variable to store pricing info
         window.bookingData = {
             pricePerHour: 0,
+            priceFullDay: 0,
             selectedRoomId: null
         };
 
         // Room selection handler
-        function selectRoom(element, roomId, pricePerHour) {
+        function selectRoom(element, roomId, pricePerHour, priceFullDay) {
             document.querySelectorAll('.room-card').forEach(card => {
                 card.classList.remove('selected');
             });
@@ -624,6 +729,7 @@
             
             // Update global booking data
             window.bookingData.pricePerHour = parseFloat(pricePerHour);
+            window.bookingData.priceFullDay = parseFloat(priceFullDay);
             window.bookingData.selectedRoomId = roomId;
             
             // Update hidden field
@@ -667,6 +773,7 @@
                 const totalPrice = roundedHours * window.bookingData.pricePerHour;
                 priceDisplay.textContent = totalPrice.toFixed(2);
                 priceHiddenInput.value = totalPrice.toFixed(2); // Update the hidden input here
+                
             } else {
                 priceDisplay.textContent = '0.00';
                 priceHiddenInput.value = '0.00';
@@ -716,11 +823,11 @@
             document.getElementById('booking_date').min = today;
         });
     </script>
-    @if ($errors->has('time_slot'))
-        <script>
-            alert("{{ $errors->first('time_slot') }}");
-        </script>
-    @endif
+@if ($errors->any())
+    <script>
+        alert("{{ implode('\n', $errors->all()) }}");
+    </script>
+@endif
 
 </body>
 </html>

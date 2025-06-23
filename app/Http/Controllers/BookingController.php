@@ -41,7 +41,6 @@ class BookingController extends Controller
             'total_price' => 'required|numeric|min:0',
         ]);
 
-
         // Check for conflicting bookings
         $conflict = Booking::where('room_id', $validated['room_id'])
             ->where('booking_date', $validated['booking_date'])
@@ -64,7 +63,6 @@ class BookingController extends Controller
 
         // Create the booking
         $booking = Auth::user()->bookings()->create($validated);
-        
         // Redirect with success message
         return redirect()->route('userprofile')
                          ->with('success', 'Booking created successfully!');
