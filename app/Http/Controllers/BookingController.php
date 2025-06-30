@@ -30,10 +30,14 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge([
+            'end_date' => $request->input('booking_end_date')
+        ]);
         // Validate the request data
         $validated = $request->validate([
             'room_id' => 'required|exists:rooms,id',
             'booking_date' => 'required|date|after_or_equal:today',
+            'end_date' => 'nullable|date|after_or_equal:booking_date',
             'start_time' => 'required',
             'end_time' => 'required|after:start_time',
             'purpose_type' => 'required|string|max:255',
@@ -41,17 +45,29 @@ class BookingController extends Controller
             'total_price' => 'required|numeric|min:0',
         ]);
 
-        // Check for conflicting bookings
+        // Check for conflicting bookings (only using booking_date logic)
+        // Determine start and end date
+        $startDate = $validated['booking_date'];
+        $endDate = $validated['end_date'] ?? $startDate;
+
         $conflict = Booking::where('room_id', $validated['room_id'])
-            ->where('booking_date', $validated['booking_date'])
             ->where('status', 'approved')
-            ->where(function($query) use ($validated) {
+            ->where(function ($query) use ($startDate, $endDate, $validated) {
+                $query->where(function ($q) use ($startDate, $endDate) {
+                    $q->whereDate('booking_date', '<=', $endDate)
+                    ->where(function ($inner) use ($startDate) {
+                        $inner->whereNull('end_date')
+                                ->orWhereDate('end_date', '>=', $startDate);
+                    });
+                });
+            })
+            ->where(function ($query) use ($validated) {
                 $query->whereBetween('start_time', [$validated['start_time'], $validated['end_time']])
-                      ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
-                      ->orWhere(function($q) use ($validated) {
-                          $q->where('start_time', '<=', $validated['start_time'])
+                    ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
+                    ->orWhere(function ($q) use ($validated) {
+                        $q->where('start_time', '<=', $validated['start_time'])
                             ->where('end_time', '>=', $validated['end_time']);
-                      });
+                    });
             })
             ->exists();
 
@@ -61,11 +77,17 @@ class BookingController extends Controller
             ])->withInput();
         }
 
+        // Conditionally add end_date if it was provided
+        if ($request->filled('end_date')) {
+            $validated['end_date'] = $request->end_date;
+        }
+
         // Create the booking
         $booking = Auth::user()->bookings()->create($validated);
+
         // Redirect with success message
         return redirect()->route('userprofile')
-                         ->with('success', 'Booking created successfully!');
+                        ->with('success', 'Booking created successfully!');
     }
 
     public function index()

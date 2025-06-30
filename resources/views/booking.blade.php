@@ -309,6 +309,8 @@
                                 const priceDisplay = document.getElementById('pricePlaceholder');
                                 
                                 if (checkbox.checked) {
+                                    enableMultiDayDateSelection(true);
+                                    setCustomTimeInputsDisabled(true);
                                     // Set entire day times
                                     startTimeInput.value = '08:00';
                                     endTimeInput.value = '22:00';
@@ -336,6 +338,8 @@
                                     
                                     calculateTotalPrice();
                                 } else {
+                                    enableMultiDayDateSelection(false);
+                                    setCustomTimeInputsDisabled(false);
                                     // Enable all time slots
                                     timeSlots.forEach(slot => {
                                         slot.classList.remove('disabled');
@@ -351,8 +355,110 @@
                                     
                                 }
                             }
-                            
-                            // Make selectTimeSlot available globally
+
+                            function setCustomTimeInputsDisabled(isDisabled = true) {
+                                const startInput = document.getElementById('start_time');
+                                const endInput = document.getElementById('end_time');
+
+                                if (!startInput || !endInput) return;
+
+                                startInput.readOnly = isDisabled;
+                                endInput.readOnly = isDisabled;
+
+                                if (isDisabled) {
+                                    startInput.value = '08:00';
+                                    endInput.value = '22:00';
+                                } else {
+                                    startInput.value = '';
+                                    endInput.value = '';
+                                }
+                            }
+
+                            function enableMultiDayDateSelection(enable = true) {
+                                const dateSection = document.getElementById('dateSection');
+                                const bookingDate = document.getElementById('booking_date');
+                                const bookingEndDate = document.getElementById('booking_end_date');
+                                const dateOptions = document.querySelectorAll('.date-option');
+
+                                // Ensure we proceed only if elements exist
+                                if (!dateSection || !bookingDate || !bookingEndDate) return;
+
+                                // Clear previous labels (if any)
+                                dateSection.querySelectorAll('.from-label, .to-label').forEach(el => el.remove());
+
+                                if (enable) {
+                                    // Hide all quick-select badges
+                                    dateOptions.forEach(badge => badge.classList.add('d-none'));
+
+                                    // Create and insert "From" label above booking_date
+                                    const fromLabel = document.createElement('label');
+                                    fromLabel.textContent = 'From:';
+                                    fromLabel.className = 'form-label from-label';
+                                    bookingDate.parentNode.insertBefore(fromLabel, bookingDate);
+
+                                    // Show booking_end_date field and insert "To" label
+                                    bookingEndDate.classList.remove('d-none');
+                                    bookingEndDate.disabled = false;
+
+                                    const toLabel = document.createElement('label');
+                                    toLabel.textContent = 'To:';
+                                    toLabel.className = 'form-label to-label';
+
+                                    // Place To label and end date input after start date
+                                    bookingDate.parentNode.insertBefore(toLabel, bookingEndDate);
+                                } else {
+                                    // Re-enable quick-select badges
+                                    dateOptions.forEach(badge => badge.classList.remove('d-none'));
+
+                                    // Hide and disable end date
+                                    bookingEndDate.classList.add('d-none');
+                                    bookingEndDate.disabled = true;
+
+                                    // Remove labels if toggled off
+                                    dateSection.querySelectorAll('.from-label, .to-label').forEach(el => el.remove());
+                                }
+                            }
+
+                            function validateDateRange() {
+                                const startDateInput = document.getElementById('booking_date');
+                                const endDateInput = document.getElementById('booking_end_date');
+
+                                if (!startDateInput || !endDateInput || endDateInput.disabled) return;
+
+                                const startDate = new Date(startDateInput.value);
+                                const endDate = new Date(endDateInput.value);
+
+                                if (endDate < startDate) {
+                                    alert('End date must be after the start date.');
+                                    endDateInput.value = ''; // Reset invalid input
+                                    return false;
+                                }
+
+                                calculateTotalPrice();
+                                return true;
+                            }
+
+                            const endDateInput = document.getElementById('booking_end_date');
+                            const startDateInput = document.getElementById('booking_date');
+
+                            if (startDateInput && endDateInput) {
+                                endDateInput.addEventListener('change', validateDateRange);
+                                startDateInput.addEventListener('change', function () {
+                                    if (endDateInput.value) {
+                                        validateDateRange();
+                                    }
+                                });
+                            }
+
+                            startDateInput.addEventListener('change', function () {
+                                if (endDateInput) {
+                                    const startVal = this.value;
+                                    const startDate = new Date(startVal);
+                                    startDate.setDate(startDate.getDate() + 1); // Next day
+                                    endDateInput.min = startDate.toISOString().split('T')[0];
+                                }
+                            });
+                                                        // Make selectTimeSlot available globally
                             window.selectTimeSlot = selectTimeSlot;
                             window.toggleEntireDay = toggleEntireDay;
                         });
@@ -448,18 +554,20 @@
                         </div>
 
                         <!-- Date Selection Section -->
-                        <div class="mb-4">
+                        <div class="mb-4" id="dateSection">
                             <h5 class="form-section-title"><i class="fas fa-calendar-day me-2"></i>Select Date</h5>
                             <div class="d-flex align-items-center flex-wrap gap-3">
+                                <!-- Start Date -->
                                 <input type="date" name="booking_date" id="booking_date" class="form-control" style="max-width: 200px;" required>
-                                
+
+                                <!-- End Date: Initially hidden -->
+                                <input type="date" name="booking_end_date" id="booking_end_date" class="form-control d-none" style="max-width: 200px;" disabled>
+
+                                <!-- Quick-select date badges -->
                                 <div class="d-flex flex-wrap gap-2">
-                                    <!-- Today - Always visible with proper contrast -->
                                     <span class="badge date-option active" data-action="today">
                                         <i class="fas fa-sun me-1"></i> Today
                                     </span>
-                                    
-                                    <!-- Other options -->
                                     <span class="badge date-option" data-action="tomorrow">
                                         <i class="fas fa-arrow-right me-1"></i> Tomorrow
                                     </span>
@@ -472,6 +580,7 @@
                                 </div>
                             </div>
                         </div>
+
 
                         <!-- JavaScript -->
                         <script>
@@ -739,46 +848,73 @@
             calculateTotalPrice();
         }
 
-        // Price calculation function
         function calculateTotalPrice() {
             const startTimeInput = document.getElementById('start_time');
             const endTimeInput = document.getElementById('end_time');
             const priceDisplay = document.getElementById('pricePlaceholder');
-            const priceHiddenInput = document.getElementById('total_price'); // Add this
+            const priceHiddenInput = document.getElementById('total_price');
+            const entireDayCheckbox = document.getElementById('entireDayToggle');
 
-            // Validate inputs
-            if (!startTimeInput.value || !endTimeInput.value || window.bookingData.pricePerHour <= 0) {
-                priceDisplay.textContent = '0.00';
-                priceHiddenInput.value = '0.00'; // Reset the hidden input
+           
+            // Handle Entire Day pricing with multi-day logic
+            if (entireDayCheckbox && entireDayCheckbox.checked) {
+                const fullDayPrice = window.bookingData.priceFullDay || 0;
+
+                const startDateInput = document.getElementById('booking_date');
+                const endDateInput = document.getElementById('booking_end_date');
+
+                const startDate = new Date(startDateInput.value);
+                const endDate = endDateInput && endDateInput.value
+                    ? new Date(endDateInput.value)
+                    : new Date(startDate); // default to same day if empty
+
+                const diffTime = Math.abs(endDate - startDate);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+                const totalPrice = fullDayPrice * diffDays;
+
+                priceDisplay.textContent = totalPrice.toFixed(2);
+                priceHiddenInput.value = totalPrice.toFixed(2);
                 return;
             }
 
-            // Parse times
+            // Skip if missing inputs or price per hour is invalid
+            if (!startTimeInput.value || !endTimeInput.value || window.bookingData.pricePerHour <= 0) {
+                priceDisplay.textContent = '0.00';
+                priceHiddenInput.value = '0.00';
+                
+                return;
+            }
+
+            // Per-hour calculation
             const [startHours, startMins] = startTimeInput.value.split(':').map(Number);
             const [endHours, endMins] = endTimeInput.value.split(':').map(Number);
 
-            // Calculate duration in hours
             let durationHours = (endHours + endMins / 60) - (startHours + startMins / 60);
 
-            // Handle overnight bookings (if allowed)
+            // Handle overnight bookings
             if (durationHours < 0) {
-                durationHours += 24; // Add 24 hours if end time is next day
+                durationHours += 24;
             }
 
-            // Always round up to the next full hour
             const roundedHours = Math.ceil(durationHours);
+            
 
-            // Calculate and display price
             if (roundedHours > 0) {
-                const totalPrice = roundedHours * window.bookingData.pricePerHour;
-                priceDisplay.textContent = totalPrice.toFixed(2);
-                priceHiddenInput.value = totalPrice.toFixed(2); // Update the hidden input here
+                let totalPrice = roundedHours * window.bookingData.pricePerHour;
                 
+                if(totalPrice > window.bookingData.priceFullDay){
+                    totalPrice = window.bookingData.priceFullDay;
+                }
+                
+                priceDisplay.textContent = totalPrice.toFixed(2);
+                priceHiddenInput.value = totalPrice.toFixed(2);
             } else {
                 priceDisplay.textContent = '0.00';
                 priceHiddenInput.value = '0.00';
             }
         }
+
 
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
