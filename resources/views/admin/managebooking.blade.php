@@ -366,7 +366,15 @@
                         <td>
                             <div>
                                 <i class="fas fa-calendar-day calendar-icon"></i>
-                                {{ \Carbon\Carbon::parse($booking->booking_date)->format('D, d M Y') }}
+                                <span 
+                                    @if($booking->end_date && $booking->end_date != $booking->booking_date)
+                                        class="text-decoration-underline" 
+                                        data-bs-toggle="tooltip" 
+                                        title="Ends: {{ \Carbon\Carbon::parse($booking->end_date)->format('D, d M Y') }}"
+                                    @endif
+                                >
+                                    {{ \Carbon\Carbon::parse($booking->booking_date)->format('D, d M Y') }}
+                                </span>
                             </div>
                             <div>
                                 <i class="fas fa-clock calendar-icon"></i>

@@ -14,6 +14,7 @@ class Booking extends Model
         'room_id',
         'booking_date',
         'start_time',
+        'end_date',
         'end_time',
         'purpose_type',
         'purpose',

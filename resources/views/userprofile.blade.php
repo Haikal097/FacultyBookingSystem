@@ -6,6 +6,7 @@
     @if (Route::has('login'))
         <div class="mb-4"></div>
     @endif
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 <body class="bg-light text-dark min-vh-100">
     <!-- Main Content -->
     <main class="container py-4">
@@ -143,7 +144,16 @@
                                 <tr>
                                     <td>{{ $booking->purpose_type }}</td>
                                     <td>{{ $booking->room->name ?? 'N/A' }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') }}</td>
+                                    <td>
+                                        @if ($booking->end_date && $booking->end_date !== $booking->booking_date)
+                                            <span data-bs-toggle="tooltip" title="Booking until {{ \Carbon\Carbon::parse($booking->end_date)->format('d M Y') }}">
+                                                {{ \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') }}
+                                                <i class="bi bi-calendar-range ms-1 text-primary"></i> {{-- Bootstrap Icons --}}
+                                            </span>
+                                        @else
+                                            {{ \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') }}
+                                        @endif
+                                    </td>
                                     <td>{{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}</td>
                                     <td>RM {{ number_format($booking->total_price, 2) }}</td>
                                     <td>
@@ -403,6 +413,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('approveForm').action = approveUrl;
                 document.getElementById('rejectForm').action = rejectUrl;
             @endif
+        });
+
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     });
 });
