@@ -2,7 +2,7 @@
     <div class="container-fluid ps-0">
         <div class="d-flex align-items-center">
             <a class="navbar-brand me-4" href="#">
-                <i class="fas fa-door-open me-2"></i>TERA
+                <i class="fas fa-door-open me-2"></i>Faculty Booking
             </a>
             <div class="navbar-nav">
                 <a class="nav-link pe-3 {{ request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">

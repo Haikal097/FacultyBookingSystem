@@ -101,7 +101,7 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8 text-center text-md-start">
                     <h1 class="hero-title display-2 fw-bold text-white mb-4">
-                        Welcome to <span class="text-primary">UiTM</span> Facility Booking
+                        Faculty Booking<br>System
                     </h1>
                     <p class="hero-subtitle lead fs-3 text-white mb-5">
                         Easily book lecture halls, meeting rooms, and sports facilities with our intuitive platform
