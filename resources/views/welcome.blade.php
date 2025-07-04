@@ -110,6 +110,7 @@
                         <a href="{{ route('bookings.create') }}" class="btn btn-primary btn-lg px-4 py-3 rounded-pill">
                             <i class="fas fa-calendar-check me-2"></i> Book Now
                         </a>
+                        
                     </div>
                 </div>
             </div>
