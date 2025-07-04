@@ -110,9 +110,6 @@
                         <a href="{{ route('bookings.create') }}" class="btn btn-primary btn-lg px-4 py-3 rounded-pill">
                             <i class="fas fa-calendar-check me-2"></i> Book Now
                         </a>
-                        <a href="{{ route('infographic') }}" class="btn btn-outline-light btn-lg px-4 py-3 rounded-pill">
-                            <i class="fas fa-door-open me-2"></i> View Facilities
-                        </a>
                     </div>
                 </div>
             </div>
