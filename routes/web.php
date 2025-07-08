@@ -40,7 +40,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admindashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/manageusers', [UserController::class, 'index'])->name('admin.manageuser');
-    Route::get('/managerooms', [RoomController::class, 'index'])->name('rooms.index');
     Route::get('/managebookings', [BookingController::class, 'index'])->name('admin.managebooking');
     Route::get('/admin/manage-bookings', [BookingController::class, 'manageBookings'])->name('admin.manage.bookings');
     Route::post('/managebookings/{id}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
@@ -49,6 +48,8 @@ Route::middleware('auth')->group(function () {
         return view('admin.setting');
     })->name('admin.setting');
 
+    Route::get('/managerooms', [RoomController::class, 'index'])->name('rooms.index');
+    Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
     Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
     Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
 });
@@ -60,6 +61,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 });
 
-Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
+
 
 require __DIR__.'/auth.php';

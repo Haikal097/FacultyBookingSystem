@@ -29,6 +29,7 @@ class UserController extends Controller
 
         return view('admin.manageuser', compact('users'));
     }
+    
     public function edit()
     {
         $user = auth()->user();

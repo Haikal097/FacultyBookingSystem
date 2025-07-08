@@ -250,74 +250,118 @@
                             <!--<th>Actions</th>-->
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach ($users as $index => $user)
-                        <tr>
-                            <td>{{ $users->firstItem() + $index }}</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
-                                        <i class="fas fa-user text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">{{ $user->full_name }}</h6>
-                                        <small class="text-muted">{{ $user->ic_number }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>{{ $user->phone_number ?? "-" }}</td>
-                            <td>{{ $user->ic_number ?? "-"}}</td>
-                            <!--
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary btn-action me-1" title="Edit">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" title="Delete">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>-->
-                        </tr>
-                        @endforeach
+                    <tbody id="user-table-body">
+                        <!-- JavaScript will inject user rows here -->
                     </tbody>
 
                 </table>
             </div>
             
+            <!-- Pagination Footer -->
             <div class="card-footer d-flex justify-content-between align-items-center">
-                <div class="text-muted">
-                    Showing {{ $users->firstItem() }} to {{ $users->lastItem() }} of {{ $users->total() }} entries
+                <div class="text-muted" id="user-pagination-info">
+                    <!-- Showing X to Y of Z entries -->
                 </div>
-                <nav aria-label="Page navigation">
-                    {{ $users->appends(request()->query())->links() }}
+                <nav aria-label="User page navigation">
+                    <ul class="pagination mb-0" id="user-pagination-links">
+                        <!-- Pagination buttons -->
+                    </ul>
                 </nav>
             </div>
         </div>
     </div>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.querySelector('input[name="search"]');
-        const searchForm = document.querySelector('.search-box');
-        let searchTimer;
-        
-        // Submit form when user stops typing (500ms delay)
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimer);
-            searchTimer = setTimeout(() => {
-                searchForm.submit();
-            }, 500);
-        });
-        
-        // Also allow pressing Enter to submit immediately
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                clearTimeout(searchTimer);
-                searchForm.submit();
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchUsers(); // initial load
+
+        async function fetchUsers(page = 1, search = '') {
+            try {
+                const response = await fetch(`/api/users?page=${page}&search=${encodeURIComponent(search)}`);
+                const result = await response.json();
+
+                if (response.ok && result.data) {
+                    renderUsers(result.data.data); // the actual array of users
+                    renderUserPagination(result.data); // pagination metadata
+                } else {
+                    alert('Failed to load users.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error fetching users.');
             }
-        });
+        }
+
+        function renderUsers(users) {
+            const tbody = document.getElementById('user-table-body');
+            tbody.innerHTML = '';
+
+            if (users.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center">No users found.</td></tr>`;
+                return;
+            }
+
+            users.forEach((user, index) => {
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px;">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.phone_number || '-'}</td>
+                        <td>${user.ic_number || '-'}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        function renderUserPagination(data) {
+            const info = document.getElementById('user-pagination-info');
+            const links = document.getElementById('user-pagination-links');
+
+            info.textContent = `Showing ${data.from} to ${data.to} of ${data.total} entries`;
+            links.innerHTML = '';
+
+            for (let page = 1; page <= data.last_page; page++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${page === data.current_page ? 'active' : ''}`;
+
+                const btn = document.createElement('button');
+                btn.className = 'page-link';
+                btn.textContent = page;
+                btn.onclick = () => fetchUsers(page);
+
+                li.appendChild(btn);
+                links.appendChild(li);
+            }
+        }
+
+        // Optional: debounce live search
+        const searchInput = document.querySelector('input[name="search"]');
+        if (searchInput) {
+            let debounce;
+            searchInput.addEventListener('input', () => {
+                clearTimeout(debounce);
+                debounce = setTimeout(() => {
+                    fetchUsers(1, searchInput.value);
+                }, 400);
+            });
+
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    fetchUsers(1, searchInput.value);
+                }
+            });
+        }
     });
     </script>
+
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

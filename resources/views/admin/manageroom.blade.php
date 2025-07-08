@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Manage Rooms - Admin Dashboard</title>
 
     <!-- Bootstrap CSS -->
@@ -13,6 +14,7 @@
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
 
     <style>
         :root {
@@ -434,36 +436,30 @@
                         @endforeach
                     </tbody>
                     <script>
-                        function deleteRoom(button) {
-                            // Get the room ID from the button's data-id attribute
-                            var roomId = button.getAttribute('data-id');
-                            
-                            // Confirm with the user before deletion
-                            if (confirm('Are you sure you want to delete this room?')) {
-                                // Create a form to send the DELETE request to the server
-                                var form = document.createElement('form');
-                                form.method = 'POST';
-                                form.action = '/rooms/' + roomId; // Assuming you have a route like /rooms/{id}
+                        async function deleteRoom(button) {
+                            const roomId = button.getAttribute('data-id');
 
-                                // Create a CSRF token input field (Laravel requires CSRF tokens for POST, PUT, DELETE requests)
-                                var csrfToken = document.createElement('input');
-                                csrfToken.type = 'hidden';
-                                csrfToken.name = '_token';
-                                csrfToken.value = '{{ csrf_token() }}'; // Laravel's CSRF token helper
+                            if (!roomId || !confirm('Are you sure you want to delete this room?')) return;
 
-                                // Create the DELETE method input field (Laravel uses method spoofing)
-                                var methodInput = document.createElement('input');
-                                methodInput.type = 'hidden';
-                                methodInput.name = '_method';
-                                methodInput.value = 'DELETE';
+                            try {
+                                const response = await fetch(`/api/rooms/${roomId}`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Accept': 'application/json'
+                                    }
+                                });
 
-                                // Append the CSRF token and method input to the form
-                                form.appendChild(csrfToken);
-                                form.appendChild(methodInput);
+                                const result = await response.json();
 
-                                // Append the form to the body and submit it
-                                document.body.appendChild(form);
-                                form.submit();
+                                if (response.ok) {
+                                    alert('Room deleted successfully!');
+                                    location.reload(); // Or remove row from table dynamically
+                                } else {
+                                    alert('Error deleting room: ' + (result.message || 'Unknown error'));
+                                }
+                            } catch (error) {
+                                console.error(error);
+                                alert('Network error. Could not delete room.');
                             }
                         }
 
@@ -517,7 +513,7 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('rooms.store') }}" method="POST">
+                <form id="roomForm">
                     @csrf
                     <div class="modal-body">
                         <!-- Room Basic Info Section -->
@@ -675,9 +671,7 @@
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="editRoomForm" method="POST">
-                    @csrf
-                    @method('PUT')
+                <form id="editRoomForm">
                     <div class="modal-body">
                         <!-- Room Basic Info Section -->
                         <div class="mb-4">
@@ -784,4 +778,119 @@
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+    function renderRooms(rooms) {
+        const tableBody = document.getElementById('room-table-body');
+        tableBody.innerHTML = '';
+
+        if (rooms.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center">No rooms available.</td></tr>';
+            return;
+        }
+
+        rooms.forEach(room => {
+            const row = `
+                <tr>
+                    <td>${room.name}</td>
+                    <td>${room.type}</td>
+                    <td>${room.capacity}</td>
+                    <td>${room.building}</td>
+                    <td>RM ${parseFloat(room.price_per_hour).toFixed(2)}</td>
+                    <td>${room.status}</td>
+                    <td>
+                        <button onclick="editRoom(${room.id})">Edit</button>
+                        <button onclick="deleteRoom(${room.id})">Delete</button>
+                    </td>
+                </tr>
+            `;
+            tableBody.insertAdjacentHTML('beforeend', row);
+        });
+    }
+});
+
+document.getElementById('roomForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // Prevent default form submission
+
+    const form = e.target;
+
+    const formData = {
+        name: form.name.value,
+        type: form.type.value,
+        capacity: form.capacity.value,
+        building: form.building.value,
+        status: form.status.value,
+        price_per_hour: form.price_per_hour.value,
+        price_fullday: form.price_fullday.value || null,
+        description: form.description.value || null,
+    };
+
+    try {
+        const response = await fetch('/api/rooms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('Room created successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (result.message || 'Something went wrong.'));
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Network error. Please try again later.');
+    }
+});
+
+document.getElementById('editRoomForm').addEventListener('submit', async function(e) {
+    e.preventDefault(); // prevent normal form submission
+
+    const roomId = this.action.split('/').pop(); // extract ID from action URL
+
+    const formData = {
+        name: document.getElementById('editRoomName').value,
+        type: document.getElementById('editRoomType').value,
+        capacity: document.getElementById('editRoomCapacity').value,
+        building: document.getElementById('editBuilding').value,
+        status: document.getElementById('editRoomStatus').value,
+        description: document.getElementById('editRoomDescription').value,
+        price_per_hour: parseFloat(document.getElementById('editRoomPrice').value),
+        price_fullday: parseFloat(document.getElementById('editRoomPriceFullDay').value) || 0
+    };
+
+    try {
+        const response = await fetch(`/api/rooms/${roomId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('Room updated successfully!');
+            location.reload(); // or update row in table dynamically
+        } else {
+            alert('Error updating room: ' + (result.message || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Network error. Could not update room.');
+    }
+});
+</script>
+
 </html>
