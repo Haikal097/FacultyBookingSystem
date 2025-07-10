@@ -213,4 +213,10 @@ class BookingController extends Controller
 
         return response()->json(['message' => 'Booking cancelled successfully.']);
     }
+
+    public function pdfview($id)
+    {
+        $booking = Booking::findOrFail($id);
+        return view('partials.pdf-template', compact('booking'));
+    }
 }

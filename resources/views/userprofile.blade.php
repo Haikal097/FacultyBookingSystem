@@ -177,6 +177,7 @@
                                                 data-facility="{{ $booking->room->name ?? 'N/A' }}"
                                                 data-building="{{ $booking->room->building ?? 'N/A' }}"
                                                 data-date="{{ \Carbon\Carbon::parse($booking->booking_date)->format('d M Y') }}"
+                                                data-end-date="{{ $booking->end_date ? \Carbon\Carbon::parse($booking->end_date)->format('d M Y') : '' }}"
                                                 data-time="{{ \Carbon\Carbon::parse($booking->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->end_time)->format('H:i') }}"
                                                 data-price="RM {{ number_format($booking->total_price, 2) }}"
                                                 data-status="{{ ucfirst($booking->status) }}"
@@ -248,18 +249,34 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button id="cancelBookingButton" class="btn btn-danger">Cancel Booking</button>
+                                    <a href="#" id="downloadPdfBtn"
+                                    target="_blank"
+                                    class="btn btn-outline-success"
+                                    download="booking.pdf"
+                                    style="display: none;">
+                                    📄 Download PDF
+                                    </a>
                                     <script>
                                         let currentBookingId = null;
 
                                         function toggleCancelButton(button) {
-                                            var status = button.getAttribute('data-status').toLowerCase();
-                                            var cancelButton = document.getElementById('cancelBookingButton');
-                                            currentBookingId = button.getAttribute('data-id');  // Get current booking ID
+                                            const status = button.getAttribute('data-status').toLowerCase();
+                                            const cancelButton = document.getElementById('cancelBookingButton');
+                                            const downloadBtn = document.getElementById('downloadPdfBtn');
+                                            currentBookingId = button.getAttribute('data-id');
 
+                                            // Show/hide cancel button
                                             if (cancelButton) {
                                                 cancelButton.style.display = (status === 'pending') ? 'inline-block' : 'none';
                                             }
+
+                                            // Set download link dynamically
+                                            if (downloadBtn) {
+                                                downloadBtn.href = `/api/bookings/${currentBookingId}/pdf`;
+                                                downloadBtn.style.display = 'inline-block'; // Show the button
+                                            }
                                         }
+
 
                                         document.getElementById('cancelBookingButton').addEventListener('click', function () {
                                             if (!currentBookingId) {
@@ -404,6 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const facility = this.getAttribute('data-facility');
             const building = this.getAttribute('data-building');
             const date = this.getAttribute('data-date');
+            const endDate = this.getAttribute('data-end-date');
             const time = this.getAttribute('data-time');
             const price = this.getAttribute('data-price');
             const status = this.getAttribute('data-status');
@@ -416,7 +434,9 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('bookingPurpose').textContent = purpose || 'No additional details';
             document.getElementById('bookingFacility').textContent = facility;
             document.getElementById('bookingBuilding').textContent = building;
-            document.getElementById('bookingDate').textContent = date;
+            document.getElementById('bookingDate').textContent = endDate
+                ? `${date} - ${endDate}`
+                : date;
             document.getElementById('bookingTime').textContent = time;
             document.getElementById('bookingPrice').textContent = price;
             

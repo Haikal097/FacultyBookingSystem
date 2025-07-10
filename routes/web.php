@@ -61,6 +61,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/bookings/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 });
 
+Route::get('/pdfview/{id}', [BookingController::class, 'pdfview']);
+
 
 
 require __DIR__.'/auth.php';
