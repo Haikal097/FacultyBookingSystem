@@ -149,6 +149,164 @@ The system is structured into Modules:
   "message": "Internal Server Error"
 }
 ```
+### GET /api/rooms
+
+**Description**: Retrieve a paginated list of rooms with optional filtering.
+
+**Request**
+- **Headers**:
+  ```json
+  {
+    "Accept": "application/json"
+  }
+
+**Parameters**
+- **page**
+
+**✅ Success (Status: 200):**
+```html
+{
+  "status": 200,
+  "data": {
+    "current_page": 1,
+    "data": [
+      {
+        "id": 134953,
+        "name": "gfhgfhgfh",
+        "type": "Lecture Hall",
+        "capacity": 554,
+        "price_per_hour": "21.00",
+        "price_fullday": "10.00",
+        "created_at": "2025-07-08T07:59:05.000000Z",
+        "updated_at": "2025-07-08T09:22:23.000000Z",
+        "building": "fg",
+        "status": "maintenance",
+        "description": "gg"
+      }
+    ]
+  }
+}
+```
+
+**❌ Error (Status: 500):**
+```html
+{
+  "status": 500,
+  "message": "Internal Server Error"
+}
+```
+### POST /api/rooms
+
+**Description**: Create a new room.
+
+**Request**
+- **Headers**:
+  ```json
+  {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  }
+
+**Body**
+```html
+{
+  "name": "Conference Hall A",
+  "type": "Conference",
+  "capacity": 50,
+  "building": "Block B",
+  "status": "available",
+  "price_per_hour": 100.00,
+  "price_fullday": 600.00,
+  "description": "Spacious hall with projector and sound system."
+}
+```
+
+**✅ Success (Status: 201):**
+```html
+{
+  "status": 201,
+  "message": "Room created successfully.",
+  "data": {
+    "name": "Conference Hall A",
+    "type": "Conference",
+    "capacity": 50,
+    "building": "Block B",
+    "status": "available",
+    "price_per_hour": 100,
+    "price_fullday": 600,
+    "description": "Spacious hall with projector and sound system.",
+    "updated_at": "2025-07-19T14:34:19.000000Z",
+    "created_at": "2025-07-19T14:34:19.000000Z",
+    "id": 134956
+  }
+}
+```
+
+**❌ Error (Status: 500):**
+```html
+{
+  "message": "The given data was invalid.",
+  "errors": {
+    "name": ["The name field is required."]
+  }
+}
+```
+
+### PUT /api/rooms/{id}
+
+**Description**: Update an existing room by ID.
+
+**Request**
+- **Headers**:
+  ```json
+  {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  }
+
+**Body**
+```html
+{
+  "name": "Conference Hall B",
+  "type": "Conference",
+  "capacity": 60,
+  "building": "Block C",
+  "status": "maintenance",
+  "price_per_hour": 120.00,
+  "price_fullday": 700.00,
+  "description": "Updated hall with enhanced facilities."
+}
+```
+**✅ Success (Status: 200):**
+```html
+{
+  "status": 200,
+  "message": "Room updated successfully.",
+  "data": {
+    "id": 134956,
+    "name": "Conference Hall B",
+    "type": "Conference",
+    "capacity": 60,
+    "price_per_hour": 120,
+    "price_fullday": 700,
+    "created_at": "2025-07-19T14:34:19.000000Z",
+    "updated_at": "2025-07-19T14:37:01.000000Z",
+    "building": "Block C",
+    "status": "maintenance",
+    "description": "Updated hall with enhanced facilities"
+  }
+}
+```
+
+**❌ Error (Status: 500):**
+```html
+{
+  "message": "The given data was invalid.",
+  "errors": {
+    "status": ["The selected status is invalid."]
+  }
+}
+```
 
 ---
 
