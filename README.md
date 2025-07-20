@@ -65,7 +65,7 @@ The system is structured into Modules:
 ## 2.1 High-level Diagram
 
 <p align="center">
-  <img src="readme-images/hld.png" width="550" />
+  <img src="./readme%20image/hld.png" alt="" width="550">
 </p>
 
 
