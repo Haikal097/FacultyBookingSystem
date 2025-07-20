@@ -187,7 +187,7 @@ The Admin Booking Management interface communicates with the backend via RESTful
 
 ## 5.0 Database Design
 
-## Entity-Relationship Diagram (ERD)
+### 5.1 Entity-Relationship Diagram (ERD)
 
 The Room Booking System is structured around three core entities: **Users**, **Rooms**, and **Bookings**. The relationships are defined as:
 
@@ -202,7 +202,7 @@ Each user can make multiple bookings, and each room can be booked multiple times
 
 ---
 
-## Schema Justification
+### 5.2 Schema Justification
 
 The database was designed with simplicity, scalability, and clarity in mind. Here's a breakdown of key tables and their roles:
 
