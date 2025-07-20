@@ -187,7 +187,74 @@ The Admin Booking Management interface communicates with the backend via RESTful
 
 ## 5.0 Database Design
 
-*(Include ERD diagram and schema justification)*
+## Entity-Relationship Diagram (ERD)
+
+The Room Booking System is structured around three core entities: **Users**, **Rooms**, and **Bookings**. The relationships are defined as:
+
+- **Users ↔ Bookings**: One-to-Many  
+- **Rooms ↔ Bookings**: One-to-Many
+
+Each user can make multiple bookings, and each room can be booked multiple times. This relational structure promotes data integrity, prevents redundancy, and ensures efficient management of booking records.
+
+> *Figure: ERD showing Users, Rooms, and Bookings with primary/foreign key relationships.*
+
+---
+
+## Schema Justification
+
+The database was designed with simplicity, scalability, and clarity in mind. Here's a breakdown of key tables and their roles:
+
+### Users Table
+Stores user information and supports authentication.
+
+| Column             | Purpose                                |
+|--------------------|----------------------------------------|
+| `id` (PK)          | Unique user ID                         |
+| `name`             | Full name                              |
+| `email`            | Login & communication                  |
+| `role`             | User type (admin, staff, user)         |
+| `ic_number`        | ID card verification                   |
+| `phone_number`     | Contact info                           |
+| `email_verified_at`| Email verification status              |
+| `password`         | Secured credentials                    |
+| `remember_token`   | "Remember me" support                  |
+| `created_at`       | Timestamp when created                 |
+| `updated_at`       | Timestamp when updated                 |
+
+### Rooms Table
+Defines the attributes of bookable rooms.
+
+| Column             | Purpose                                |
+|--------------------|----------------------------------------|
+| `id` (PK)          | Unique room ID                         |
+| `name`, `type`     | Room description (e.g., Lab, Hall)     |
+| `capacity`         | Max occupancy                          |
+| `price_per_hour`   | Hourly booking rate                    |
+| `price_fullday`    | Full-day rate                          |
+| `building`         | Location of the room                   |
+| `status`           | Availability status                    |
+| `description`      | Additional details                     |
+| `created_at`       | Timestamp when created                 |
+| `updated_at`       | Timestamp when updated                 |
+
+### Bookings Table
+Tracks all room reservation data.
+
+| Column             | Purpose                                |
+|--------------------|----------------------------------------|
+| `id` (PK)          | Unique booking ID                      |
+| `user_id` (FK)     | Links to booking user                  |
+| `room_id` (FK)     | Links to booked room                   |
+| `booking_date`     | Reservation date                       |
+| `end_date`         | For multi-day bookings                 |
+| `start_time`       | Start time of booking                  |
+| `end_time`         | End time of booking                    |
+| `purpose_type`     | Type of event (e.g., seminar)          |
+| `purpose`          | Description of the booking             |
+| `status`           | Booking status (pending, approved)     |
+| `total_price`      | Calculated cost                        |
+| `created_at`       | Timestamp when created                 |
+| `updated_at`       | Timestamp when updated                 |
 
 ---
 
