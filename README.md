@@ -73,8 +73,6 @@ The system is structured into Modules:
 
 ## 3.0 Backend Application
 
-*(To be completed with backend stack, list of APIs, methods, example responses, security mechanisms like authentication, and middleware roles)*
-
 ### 3.1 Technology Stack
 
 ## 🖥️ Backend Framework & Language
@@ -107,6 +105,50 @@ The system is structured into Modules:
 
 - **@tailwindcss/forms** – Form styling plugin for Tailwind CSS  
 - **Concurrently** – Run multiple commands concurrently  
+
+### 3.2 API Documentation
+
+## GET /api/users
+
+**Description**: Retrieve a paginated list of all users.
+
+**Request**
+- **Headers**:
+  ```json
+  {
+    "Accept": "application/json"
+  }
+
+**✅ Success (Status: 200):**
+```html
+{
+  "status": 200,
+  "message": "Users fetched successfully",
+  "data": {
+    "current_page": 1,
+    "data": [
+      {
+        "id": 7,
+        "name": "Wilfred Littel",
+        "email": "walker.erling@example.org",
+        "role": 0,
+        "ic_number": null,
+        "phone_number": null,
+        "email_verified_at": "2025-07-08T10:43:45.000000Z",
+        "created_at": "2025-07-08T10:43:45.000000Z",
+        "updated_at": "2025-07-08T10:43:45.000000Z"
+      }
+    ]
+  }
+}
+```
+**❌ Error (Status: 500):**
+```html
+{
+  "status": 500,
+  "message": "Internal Server Error"
+}
+``
 
 ---
 
