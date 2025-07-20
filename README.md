@@ -238,18 +238,159 @@ When validation fails, error messages appear like:
     }
 ```
 
+---
+
 **b. Booking Details**
 
-* Ensure dates are valid (not in the past)
-* Prevent double-booking of the same room
+**Description:**
+* Users must select a purpose type (Lecture, Meeting, Study Group, etc.)
+* Users must provide additional details about the booking in the purpose field
+* Booking date and end date must be valid and not in the past
+* Room must exist in the system
+* Validation ensures that all inputs are meaningful and prevent incorrect submissions
 
-**c. New Room Addition**
+**Frontend Behavior:**
+When validation fails, error messages appear like:
+```html
+<span class="text-sm text-red-600">The email field is required.</span>
+```
 
-* Validate room name is unique
-* Check capacity and room type fields are filled
+**Blade Snippet**
+```html
+<div class="mb-4">
+    <h5 class="form-section-title">
+        <i class="fas fa-info-circle me-2"></i>Booking Details
+    </h5>
 
-\*\*d. *(Add more cases if applicable)* \*\*
+    <div class="mb-3">
+        <label for="purpose" class="form-label">Purpose</label>
+
+        <select name="purpose_type" id="purpose_type" class="form-select mb-2">
+            <option value="Lecture">Lecture</option>
+            <option value="Meeting">Meeting</option>
+            <option value="Study Group">Study Group</option>
+            <option value="Event">Event</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <textarea name="purpose" id="purpose" rows="3" class="form-control" placeholder="Please provide details about your booking..." required></textarea>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mt-4">
+    <input type="hidden" name="total_price" id="total_price" value="0.00">
+    <div class="price-info">
+        <strong>Total Price:</strong> RM <span id="pricePlaceholder">0.00</span>
+    </div>
+
+    <button type="submit" class="btn btn-book btn-lg">
+        <i class="fas fa-check-circle me-2"></i> Confirm Booking
+    </button>
+</div>
+```
+
+**Backend Validation Code:**
+```html
+public function store(Request $request)
+{
+    $request->merge([
+        'end_date' => $request->input('booking_end_date')
+    ]);
+
+    $validated = $request->validate([
+        'purpose_type' => ['required', 'in:Lecture,Meeting,Study Group,Event,Other'],
+        'purpose' => ['required', 'string', 'min:10'],
+        'booking_date' => ['required', 'date', 'after_or_equal:today'],
+        'booking_end_date' => ['required', 'date', 'after_or_equal:booking_date'],
+        'room_id' => ['required', 'exists:rooms,id'],
+    ]);
+
+    ProcessBooking::dispatch(Auth::user(), $validated);
+
+    return redirect()->route('userprofile')
+                     ->with('success', 'Booking is being processed!');
+}
+```
 
 ---
 
-> 📌 *Note: Images and diagrams can be placed inside a ****`/docs`**** or ****`/assets`**** folder and linked in markdown using ****`![Alt text](./assets/diagram.png)`**** syntax.*
+**c. New Room Addition**
+
+**Description:**
+* Allows admin users to create a new room in the system with specific attributes like name, type, capacity, price, and description.
+
+**Frontend Behavior:**
+When validation fails, error messages appear like:
+```html
+<span class="text-sm text-red-600">The email field is required.</span>
+```
+
+**Blade Snippet**
+```html
+<div class="row g-3">
+    <div class="col-md-6">
+        <label for="roomName" class="form-label">Room Name <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="roomName" name="name" placeholder="e.g. Dewan Kuliah 100" required>
+        <small class="text-muted">Enter the official room name</small>
+    </div>
+    <div class="col-md-6">
+        <label for="roomType" class="form-label">Room Type <span class="text-danger">*</span></label>
+        <select class="form-select" id="roomType" name="type" required>
+            <option value="" disabled selected>Select room type</option>
+            <option value="Lecture Hall">Lecture Hall</option>
+            <option value="Meeting Room">Meeting Room</option>
+            <option value="Computer Lab">Computer Lab</option>
+            <option value="Sports Facility">Sports Facility</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+</div>
+```
+
+**JavaScript AJAX Submission Code:**
+```html
+    try {
+        const response = await fetch('/api/rooms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('Room created successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + (result.message || 'Something went wrong.'));
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Network error. Please try again later.');
+    }
+```
+
+**Backend Validation Code:**
+```html
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'type' => 'required|string|max:255',
+        'capacity' => 'required|integer|min:1',
+        'building' => 'required|string|max:255',
+        'status' => 'required|in:available,maintenance,occupied',
+        'price_per_hour' => 'required|numeric|min:0',
+        'price_fullday' => 'nullable|numeric|min:0',
+        'description' => 'nullable|string',
+    ]);
+
+    Room::create($validated);
+
+    return redirect()->back()->with('success', 'Room added successfully.');
+}
+```
