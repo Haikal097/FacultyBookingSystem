@@ -196,7 +196,9 @@ The Room Booking System is structured around three core entities: **Users**, **R
 
 Each user can make multiple bookings, and each room can be booked multiple times. This relational structure promotes data integrity, prevents redundancy, and ensures efficient management of booking records.
 
-> *Figure: ERD showing Users, Rooms, and Bookings with primary/foreign key relationships.*
+<p align="center">
+  <img src="./readme%20image/booking-erd (1).drawio.png" alt="" width="550">
+</p>
 
 ---
 
