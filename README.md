@@ -28,13 +28,46 @@
 
 ## 1.0 Introduction
 
-*(To be completed with a short description of the system, its purpose, and problem it solves)*
+The Faculty Booking System is a web-based application designed to streamline room and facility bookings within a university faculty.
+
+Users can view available rooms, make bookings, and manage existing reservations easily via a centralized platform.
+
+The system ensures better resource allocation, reduces booking conflicts, and improves communication between staff and faculty admins.
+
+## 1.1 Commercial Value and Third-Party Integration
+
+Commercial Value:
+
+- Reduces administrative overhead and manual booking processes.
+- Enhances efficiency and productivity for both students and faculty staff.
+- Provides real-time availability and booking status to prevent scheduling issues.
+
+Third-Party Integration:
+- Uses phpMyAdmin for MySQL database management.
+- Can be integrated with Google Calendar API for event syncing (future scalability).
+- Potential to integrate with university SSO (Single Sign-On) system for authentication
 
 ---
 
 ## 2.0 System Architecture
 
-*(Insert a high-level diagram here — use image or Mermaid syntax)*
+- Built using the Laravel framework, which offers robust MVC architecture, routing, middleware, and Eloquent ORM.
+- Backend is developed in PHP (Laravel), while frontend utilizes Blade templating engine, HTML, CSS, and optional JavaScript/jQuery for interactivity.
+- phpMyAdmin (MySQL) is used to manage all booking data, room records, and user credentials.
+
+The system is structured into Modules:
+
+- User Management
+- Room Management
+- Booking Engine
+- Admin Panel
+
+## 2.1 High-level Diagram
+
+<p align="center">
+  <img src="readme-images/hld.png" width="550" />
+</p>
+
 
 ---
 
