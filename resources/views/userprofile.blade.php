@@ -342,51 +342,32 @@
                 @method('PATCH')
                 
                 <div class="modal-body">
-                    <!-- Full Name (single long input) -->
                     <div class="row mb-3">
-                        <div class="col-12">
+                        <div class="col-md-6">
                             <label for="name" class="form-label">Full Name</label>
                             <input type="text" class="form-control" id="name" name="name" 
                                 value="{{ old('name', Auth::user()->name) }}" required>
-                        </div>
-                    </div>
-
-                    <!-- Email and IC Number -->
-                    <div class="row mb-3">
+                        </div>  
                         <div class="col-md-6">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="email" name="email" 
                                 value="{{ old('email', Auth::user()->email) }}" required>
                         </div>
+                    </div>
+                    
+                    <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="ic_number" class="form-label">IC Number</label>
                             <input type="text" class="form-control" id="ic_number" name="ic_number" 
                                 value="{{ old('ic_number', Auth::user()->ic_number) }}" required>
                         </div>
-                    </div>
-
-                    <!-- Phone Number + OTP -->
-                    <div class="row mb-3 align-items-end">
                         <div class="col-md-6">
                             <label for="phone_number" class="form-label">Phone Number</label>
-                            <div class="input-group">
-                                <input type="tel" class="form-control" id="phone_number" name="phone_number"
-                                    value="{{ old('phone_number', Auth::user()->phone_number) }}" required>
-                                <button type="button" class="btn btn-outline-primary" id="sendOtpBtn">
-                                    Send OTP
-                                </button>
-                            </div>
-                            <small class="text-muted">You'll receive a 6-digit code for verification.</small>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="otp" class="form-label">Verification Code</label>
-                            <input type="text" class="form-control" id="otp" name="otp" placeholder="Enter OTP">
-                            <small class="text-muted">Enter the code sent to your phone number</small>
+                            <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                                value="{{ old('phone_number', Auth::user()->phone_number) }}" required>
                         </div>
                     </div>
-
-                    <!-- Password -->
+                    
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="password" class="form-label">New Password (leave blank to keep current)</label>

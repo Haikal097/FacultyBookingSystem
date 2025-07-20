@@ -52,13 +52,17 @@ class BookingController extends Controller
 
         $conflict = Booking::where('room_id', $validated['room_id'])
             ->where('status', 'approved')
-            ->where(function ($query) use ($startDate, $endDate, $validated) {
+            ->where(function ($query) use ($startDate, $endDate) {
                 $query->where(function ($q) use ($startDate, $endDate) {
+                    // Only overlap if booking_date <= endDate AND (end_date >= startDate OR end_date is null and booking_date >= startDate)
                     $q->whereDate('booking_date', '<=', $endDate)
-                    ->where(function ($inner) use ($startDate) {
-                        $inner->whereNull('end_date')
-                                ->orWhereDate('end_date', '>=', $startDate);
-                    });
+                      ->where(function ($inner) use ($startDate) {
+                          $inner->where(function ($i) use ($startDate) {
+                              $i->whereNull('end_date')
+                                ->whereDate('booking_date', '>=', $startDate);
+                          })
+                          ->orWhereDate('end_date', '>=', $startDate);
+                      });
                 });
             })
             ->where(function ($query) use ($validated) {
@@ -66,7 +70,7 @@ class BookingController extends Controller
                     ->orWhereBetween('end_time', [$validated['start_time'], $validated['end_time']])
                     ->orWhere(function ($q) use ($validated) {
                         $q->where('start_time', '<=', $validated['start_time'])
-                            ->where('end_time', '>=', $validated['end_time']);
+                          ->where('end_time', '>=', $validated['end_time']);
                     });
             })
             ->exists();
