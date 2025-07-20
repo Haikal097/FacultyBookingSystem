@@ -168,8 +168,42 @@ The Admin Booking Management interface communicates with the backend via RESTful
 
 **a. Log In**
 
-* Check if email and password are filled
-* Validate user role before granting access
+**Description:**
+* Email must be a valid address and exist in the database.
+* Password must be at least 8 characters.
+* Form errors are displayed inline under each input field.
+
+**Frontend Behavior:**
+When validation fails, error messages appear like:
+```html
+<span class="text-sm text-red-600">The email field is required.</span>
+```
+
+**Blade Snippet**
+```html
+<div>
+    <x-input-label for="email" :value="__('Email')" />
+    <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+    <x-input-error :messages="$errors->get('email')" class="mt-2" />
+</div>
+
+<div class="mt-4">
+    <x-input-label for="password" :value="__('Password')" />
+    <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
+    <x-input-error :messages="$errors->get('password')" class="mt-2" />
+</div>|
+```
+
+**Backend Validation Code:**
+```html
+    public function rules(): array
+    {
+        return [
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string'],
+        ];
+    }
+```
 
 **b. Booking Details**
 
