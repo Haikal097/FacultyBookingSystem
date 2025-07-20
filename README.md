@@ -307,7 +307,72 @@ The system is structured into Modules:
   }
 }
 ```
+### DELETE /api/rooms/{id}
 
+**Description**: Delete a room by ID.
+
+**Request**
+- **Headers**:
+  ```json
+  {
+    "Accept": "application/json"
+  }
+
+**Body**
+```html
+{
+  "name": "Conference Hall B",
+  "type": "Conference",
+  "capacity": 60,
+  "building": "Block C",
+  "status": "maintenance",
+  "price_per_hour": 120.00,
+  "price_fullday": 700.00,
+  "description": "Updated hall with enhanced facilities."
+}
+```
+
+**✅ Success (Status: 200):**
+```html
+{
+  "status": 200,
+  "message": "Room deleted successfully."
+}
+```
+
+**❌ Error (Status: 404):**
+```html
+{
+  "message": "No query results for model [App\\Models\\Room] 134956"
+}
+```
+### GET /api/bookings/{id}/pdf
+
+**Description**: Generate and download a PDF file for a specific booking by ID.
+
+**Request**
+- **Headers**:
+  ```json
+  {
+    "Accept": "application/json"
+  }
+
+**Parameters**
+- **id**
+
+**✅ Success (Status: 200):**
+```html
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="booking-37.pdf"
+```
+
+**❌ Error (Status: 404):**
+```html
+{
+  "message": "PDF generation failed.",
+  "error": "PDFShift curl error or exception message"
+}
+```
 ---
 
 ## 4.0 Frontend Applications
