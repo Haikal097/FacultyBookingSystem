@@ -22,7 +22,7 @@
 | 2.  | Khairulnadzmi bin Md Yusof                | B032420046       | S3G1          |
 | 3.  | Mohamad Haikal bin Rejab                  | B032420055       | S3G1          |
 | 4.  | Muhammad Aliff bin Affandi                | B032420067       | S3G1          |
-| 5.  | *(To be filled)*                          | *(To be filled)* | S3G1          |
+| 5.  | Amardeep Singh Sidhu A/L Surjit Singh     | B032420021       | S3G1          |
 
 ---
 
@@ -41,6 +41,39 @@
 ## 3.0 Backend Application
 
 *(To be completed with backend stack, list of APIs, methods, example responses, security mechanisms like authentication, and middleware roles)*
+
+### 3.1 Technology Stack
+
+## 🖥️ Backend Framework & Language
+
+- **PHP 8.2+** – Programming language  
+- **Laravel 12.0** – PHP web application framework  
+- **Laravel Breeze 2.3** – Authentication scaffolding  
+
+## 🎨 Frontend Technologies
+
+- **Blade Templates** – Laravel's templating engine  
+- **Tailwind CSS 3.1** – Utility-first CSS framework  
+- **Alpine.js 3.4.2** – Lightweight JavaScript framework  
+- **Vite 6.2.4** – Modern build tool and development server  
+
+## 🛠️ Build & Development Tools
+
+- **Composer** – PHP dependency manager  
+- **NPM** – Node.js package manager  
+- **Laravel Vite Plugin** – Asset bundling integration  
+- **PostCSS** – CSS post-processor  
+- **Autoprefixer** – CSS vendor prefix automation  
+
+## 🌐 HTTP Client & Utilities
+
+- **Axios** – HTTP client for JavaScript  
+- **Firebase/Auth & Firebase** – Authentication and real-time database services  
+
+## 📦 Additional Libraries
+
+- **@tailwindcss/forms** – Form styling plugin for Tailwind CSS  
+- **Concurrently** – Run multiple commands concurrently  
 
 ---
 
