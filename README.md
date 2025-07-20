@@ -1,3 +1,6 @@
+<p align="center">
+  <img src="./readme%20image/UTeM.jpg" alt="UTeM Logo" width="350">
+</p>
 
 ## UNIVERSITI TEKNIKAL MALAYSIA MELAKA
 ## FACULTY OF INFORMATION AND COMMUNICATION TECHNOLOGY
@@ -63,8 +66,22 @@ This frontend is designed for faculty staff or students who want to book availab
 **API Integration:**
 The Faculty Booking frontend interacts with the backend using RESTful API principles. Laravel's route system is used to define HTTP endpoints such as `GET`, `POST`, and `DELETE`. These endpoints allow the frontend to operate asynchronously using JavaScript or AJAX.
 
+<p align="center">
+  <img src="./readme%20image/Picture2.png" alt="" width="550">
+</p>
+
 **Figure 1:** Snippet of RESTful API routes used by the Faculty Booking (User) application
+
+<p align="center">
+  <img src="./readme%20image/Picture3.png" alt="" width="550">
+</p>
+
 **Figure 2:** JavaScript snippet for PDF download integration
+
+<p align="center">
+  <img src="./readme%20image/Picture4.png" alt="" width="550">
+</p>
+
 **Figure 3:** Backend method to generate PDF booking confirmation
 
 **Explanation:**
@@ -72,6 +89,10 @@ The Faculty Booking frontend interacts with the backend using RESTful API princi
 * `Route::get('/bookings/{id}/pdf', ...)` generates a downloadable PDF version of a specific booking, providing users with a digital or printable confirmation.
 
 **Frontend usage example:**
+
+<p align="center">
+  <img src="./readme%20image/Picture5.png" alt="" width="550">
+</p>
 
 **Figure 4:** Example of integrating the booking PDF download API on the frontend
 
@@ -97,8 +118,22 @@ This frontend is intended for administrators or facility managers responsible fo
 **API Integration:**
 The Admin Booking Management interface communicates with the backend via RESTful API routes. These routes allow administrative actions such as approving bookings, rejecting requests, viewing logs, and exporting reports. Laravel routes are protected by authentication and role-based access to ensure that only authorized administrators can access sensitive features.
 
+<p align="center">
+  <img src="./readme%20image/Picture6.png" alt="" width="550">
+</p>
+
 **Figure 5:** Snippet of RESTful API routes used by the Booking Management (Admin) application
+
+<p align="center">
+  <img src="./readme%20image/Picture7.png" alt="" width="550">
+</p>
+
 **Figure 6:** Frontend JavaScript function to delete a room using the `DELETE` API endpoint
+
+<p align="center">
+  <img src="./readme%20image/Picture8.png" alt="" width="550">
+</p>
+
 **Figure 7:** Laravel `destroy()` method in `RoomApiController` that handles room deletion via API
 
 **Explanation:**
@@ -108,6 +143,10 @@ The Admin Booking Management interface communicates with the backend via RESTful
 * The frontend JavaScript uses `fetch()` to call the `DELETE` method on `/api/rooms/{id}`, mapping to the controller’s `destroy()` method.
 
 **Frontend usage example:**
+
+<p align="center">
+  <img src="./readme%20image/Picture9.png" alt="" width="550">
+</p>
 
 **Figure 8:** Example of frontend JavaScript integrating the DELETE API to remove a room in the admin interface
 
